@@ -22,7 +22,7 @@ class Sample(object):
 		sample.to_csv('{output_dir}/sample/train_sample_{year}.csv'.format(output_dir=self.output_dir, year=str(self.year)), mode='a',header=True, index=False, encoding='utf-8')
 
 if __name__ == '__main__':
-	base_path = 'E:/pythonProject/stock/data/datafile'
+	base_path = 'E:/pythonProject/future/data/datafile'
 	years = [2020,2021]
 	for year in years:
 		sample = Sample(year, base_path)

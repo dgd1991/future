@@ -2,7 +2,7 @@ import csv
 import gc
 import multiprocessing
 
-import baostock as bs
+import baofuture as bs
 import pandas as pd
 import os
 import copy
@@ -18,7 +18,7 @@ import pandas as pd
 import numpy as np
 
 def get_industry_data(date):
-    rs = bs.query_stock_industry(date=date)
+    rs = bs.query_future_industry(date=date)
     industry_list = []
     while (rs.error_code == '0') & rs.next():
         industry_list.append(rs.get_row_data())

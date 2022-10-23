@@ -3,7 +3,7 @@ import pandas as pd
 
 year = 2020
 model_name = 'model_v3'
-df = pd.read_csv('E:/pythonProject/stock/data/datafile/prediction_result/{model_name}/prediction_result_{year}.csv'.format(model_name=model_name, year=str(year)), encoding='utf-8')
+df = pd.read_csv('E:/pythonProject/future/data/datafile/prediction_result/{model_name}/prediction_result_{year}.csv'.format(model_name=model_name, year=str(year)), encoding='utf-8')
 df.columns = ['date', 'code', 'predition_7d', 'label_1d', 'label_3d', 'label_5d', 'label_7d']
 # df = df.head(1000)
 df['date'] = df['date'].map(lambda x: x.replace('b', ''))

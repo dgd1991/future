@@ -2,7 +2,7 @@ import csv
 import gc
 import multiprocessing
 
-import baostock as bs
+import baofuture as bs
 import pandas as pd
 import os
 import copy
@@ -16,7 +16,7 @@ import logging
 from logging import handlers
 import pandas as pd
 import numpy as np
-industry_dict = np.load('E:/pythonProject/stock/common/industry_dict.npy').item()
+industry_dict = np.load('E:/pythonProject/future/common/industry_dict.npy').item()
 
 class Logger(object):
     level_relations = {
@@ -67,7 +67,7 @@ class Downloader(object):
         self.code_k_data_file_name = 'code_k_data_v4_' + self.date_start.split('-')[0]
         self.code_quarter_data_file_name = 'code_quarter_data_v2_2007'
         self.fields = "date,code,open,high,low,close,preclose,volume,amount,adjustflag,turn,tradestatus,pctChg,peTTM,pbMRQ,psTTM,pcfNcfTTM,isST"
-        self.stock_df = self.get_codes_by_date(date_end)
+        self.future_df = self.get_codes_by_date(date_end)
         self.code_industry_data = self.get_industry_data(self.date_end)
 
     def exit(self):
@@ -75,14 +75,14 @@ class Downloader(object):
 
     # 获取当天的所有可交易的股票dataframe，包含code，tradeStatus，code_name
     def get_codes_by_date(self, date):
-        stock_rs = bs.query_all_stock(date)
-        stock_df = stock_rs.get_data()
-        return stock_df
+        future_rs = bs.query_all_future(date)
+        future_df = future_rs.get_data()
+        return future_df
 
     def get_k_raw_data(self):
-        # stock_df是指当天的所有可交易的股票dataframe
+        # future_df是指当天的所有可交易的股票dataframe
         df_list = []
-        for index, row in self.stock_df.iterrows():
+        for index, row in self.future_df.iterrows():
             index += 1
             code_k_data = bs.query_history_k_data_plus(row["code"], self.fields, start_date=self.date_start, end_date=self.date_end, frequency="d", adjustflag="2").get_data()
             if len(code_k_data)>0:
@@ -94,7 +94,7 @@ class Downloader(object):
                     code_k_data.to_csv('{output_dir}/{code_k_data}.csv'.format(output_dir=self.output_dir, code_k_data=self.code_k_data_file_name),mode='a', header=True, index=False)
 
     def get_industry_data(self, date):
-        rs = bs.query_stock_industry(date=date)
+        rs = bs.query_future_industry(date=date)
         industry_list = []
         while (rs.error_code == '0') & rs.next():
             industry_list.append(rs.get_row_data())
@@ -245,13 +245,13 @@ class Downloader(object):
             quarter_data_his = quarter_data_his[['code', 'quarter']]
             quarter_data_his_2 = quarter_data_his[(quarter_data_his['quarter'] == int(str(year_2) + str(quarter_2)))]
             quarter_data_his = quarter_data_his[(quarter_data_his['quarter'] == int(str(year) + str(quarter)))]
-            quarter_data_his = pd.merge(self.stock_df, quarter_data_his, how="left", left_on=['code'],right_on=['code'])
+            quarter_data_his = pd.merge(self.future_df, quarter_data_his, how="left", left_on=['code'],right_on=['code'])
             quarter_data_his = quarter_data_his[quarter_data_his['quarter'].isnull()]
-            quarter_data_his_2 = pd.merge(self.stock_df, quarter_data_his_2, how="left", left_on=['code'], right_on=['code'])
+            quarter_data_his_2 = pd.merge(self.future_df, quarter_data_his_2, how="left", left_on=['code'], right_on=['code'])
             quarter_data_his_2 = quarter_data_his[quarter_data_his_2['quarter'].isnull()]
         else:
-            quarter_data_his = self.stock_df
-            quarter_data_his_2 = self.stock_df
+            quarter_data_his = self.future_df
+            quarter_data_his_2 = self.future_df
         print('read history data down')
         for index, row in quarter_data_his_2.iterrows():
             quarter_data_list = []
@@ -394,7 +394,7 @@ class Downloader(object):
         # gc.collect()
         # train_data = train_data.sort_values(by=['date', 'code'], ascending=True)
         # test_data = test_data.sort_values(by=['date', 'code'], ascending=True)
-        # train_data = pd.read_csv('E:/pythonProject/stock/data/datafile/train_data_category.csv')
+        # train_data = pd.read_csv('E:/pythonProject/future/data/datafile/train_data_category.csv')
         # train_data.to_csv('{output_dir}/{train_data}.csv'.format(output_dir=self.output_dir, train_data='train_data_category1'), mode='a',header=True, index=False, encoding='utf-8')
         # del train_data
         # gc.collect()
@@ -406,11 +406,11 @@ class Downloader(object):
         #     else:
         #         f.readline()
         # f = open('{output_dir}/{test_data}.csv'.format(output_dir=self.output_dir, test_data='test_data_category1'), mode='a', encoding='utf-8', newline="")
-        # test_data = pd.read_csv('E:/pythonProject/stock/data/datafile/test_data_category1.csv')
+        # test_data = pd.read_csv('E:/pythonProject/future/data/datafile/test_data_category1.csv')
         # test_data = test_data.iloc[0:10000,:]
         # test_data.to_csv('{output_dir}/{train_data}.csv'.format(output_dir=self.output_dir, train_data='test_data_category1'), mode='a',header=True, index=False, encoding='utf-8')
 
-        with open('E:/pythonProject/stock/data/datafile/egg.csv', mode='w+', encoding='utf-8-sig', newline='') as csvfile:
+        with open('E:/pythonProject/future/data/datafile/egg.csv', mode='w+', encoding='utf-8-sig', newline='') as csvfile:
             spamwriter = csv.writer(csvfile, dialect='excel')
             spamwriter.writerow(['a', '1', '1', '2', '2'])
             spamwriter.writerow(['b', '3', '3', '6', '4'])
@@ -430,13 +430,13 @@ def job(q):
     d = begin
     delta = datetime.timedelta(days=1)
     while d <= end:
-        logpath = 'E:/pythonProject/stock/data/datafile/raw_feature/' + str(year) + '_log.txt'
+        logpath = 'E:/pythonProject/future/data/datafile/raw_feature/' + str(year) + '_log.txt'
         log = Logger(logpath, level='info')
         # print(d.strftime("%Y-%m-%d"))
         log.logger.info(d.strftime("%Y-%m-%d" + ":  start !!!!!!!!!!"))
-        downloader = Downloader('E:/pythonProject/stock/data/datafile/raw_feature', date_start=d.strftime("%Y-%m-%d"),
+        downloader = Downloader('E:/pythonProject/future/data/datafile/raw_feature', date_start=d.strftime("%Y-%m-%d"),
                                 date_end=d.strftime("%Y-%m-%d"))
-        if len(downloader.stock_df) > 0:
+        if len(downloader.future_df) > 0:
             downloader.get_k_raw_data()
             # downloader.get_quarter_data_all()
             # downloader.get_feature_and_label(k_file_name, industry_file_name, quarter_file_name)
@@ -476,8 +476,8 @@ if __name__ == '__main__':
     main()
     # mkdir('./datafile')
 
-    # downloader = Downloader('E:/pythonProject/stock/data/datafile/raw_feature', date_start='2022-06-16', date_end='2022-06-16')
-    # if len(downloader.stock_df)>0:
+    # downloader = Downloader('E:/pythonProject/future/data/datafile/raw_feature', date_start='2022-06-16', date_end='2022-06-16')
+    # if len(downloader.future_df)>0:
     #     downloader.get_k_raw_data()
     #     # downloader.get_quarter_data_all()
     #     # downloader.get_feature_and_label(k_file_name, industry_file_name, quarter_file_name)

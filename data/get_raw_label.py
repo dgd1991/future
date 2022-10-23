@@ -105,7 +105,7 @@ class Label(object):
 		return label
 
 if __name__ == '__main__':
-	path = 'E:/pythonProject/stock/data/datafile/raw_feature/code_k_data_v4_'
+	path = 'E:/pythonProject/future/data/datafile/raw_feature/code_k_data_v4_'
 	year = 2007
 	Label = Label(path + str(year) + '.csv', path + str(year + 1) + '.csv', year)
 	years = [2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022]
@@ -114,7 +114,7 @@ if __name__ == '__main__':
 		Label.path1 = path + str(year) + '.csv'
 		Label.path2 = path + str(year + 1) + '.csv'
 		label_raw = Label.get_raw_label()
-		label_raw.to_csv('E:/pythonProject/stock/data/datafile/label/{year}_raw_v4.csv'.format(year=str(year)),
+		label_raw.to_csv('E:/pythonProject/future/data/datafile/label/{year}_raw_v4.csv'.format(year=str(year)),
 		                   mode='w', header=True, index=False)
 
 

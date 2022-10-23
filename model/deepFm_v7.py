@@ -15,14 +15,14 @@ from tensorflow.core.util.event_pb2 import SessionLog
 class DeepFM(object):
     def __init__(self, year, train_stype, model_name, saved_model):
         # for index in range(10):
-        #     self.train_data.append('E:/pythonProject/stock/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(
+        #     self.train_data.append('E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(
         #         model_name=model_name, year=str(index + 2008)))
 
-        self.train_data = 'E:/pythonProject/stock/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
-        self.test_data = 'E:/pythonProject/stock/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year+1))
-        self.prediction_result = 'E:/pythonProject/stock/data/datafile/prediction_result/{model_name}/prediction_result_{year}.csv'.format(model_name=saved_model, year=str(year+1))
+        self.train_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+        self.test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year+1))
+        self.prediction_result = 'E:/pythonProject/future/data/datafile/prediction_result/{model_name}/prediction_result_{year}.csv'.format(model_name=saved_model, year=str(year+1))
         self.task_type = train_stype
-        self.checkpoint_path = "E:\\pythonProject\\stock\\saved_model\\{model_name}".format(model_name=str(saved_model))
+        self.checkpoint_path = "E:\\pythonProject\\future\\saved_model\\{model_name}".format(model_name=str(saved_model))
         self.save_summary_steps = 100000
         self.save_checkpoint_and_eval_step = 100000
         self.every_n_steps = 100000
@@ -357,7 +357,7 @@ class DeepFM(object):
 #
 def main():
     model = DeepFM(2010, 'predict', 'model_v4')
-    test_data = 'E:/pythonProject/stock/data/datafile/sample/{model_name}/train_sample_{year}_test.csv'.format(model_name='model_v4', year=str(2010))
+    test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}_test.csv'.format(model_name='model_v4', year=str(2010))
     features_batch, label_batch = model.test_input_fn_from_csv(data_path=test_data, epoch=1, batch_size=1)
 
     # dataset = model.test_input_fn_from_csv(data_path=test_data, epoch=1, batch_size=2)
@@ -386,7 +386,7 @@ def main():
         print('end')
 
 if __name__ == "__main__":
-    # rm -r E:/pythonProject/stock/saved_model/*
+    # rm -r E:/pythonProject/future/saved_model/*
     # main()
     # tf.test.is_gpu_available()
     # years = [2011, 2012, 2013, 2014]
@@ -401,8 +401,8 @@ if __name__ == "__main__":
     epoch = 2
     for year in years:
         for epo in range(epoch):
-            train_data_path_raw = 'E:/pythonProject/stock/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
-            train_data_path = 'E:/pythonProject/stock/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+            train_data_path_raw = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+            train_data_path = 'E:/pythonProject/future/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
             train_data_raw = pd.read_csv(train_data_path_raw).sample(frac=1)
             if os.path.isfile(train_data_path):
                 os.remove(train_data_path)

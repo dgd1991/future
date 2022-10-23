@@ -1,10 +1,10 @@
 import pandas as pd
 year = 2020
 model_name = 'model_v4'
-# test_data = 'E:/pythonProject/stock/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+# test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
 # df = pd.read_csv(test_data)
 # # df = df[df['date']==20200126]
-# test_data1 = 'E:/pythonProject/stock/data/datafile/prediction_result/{model_name}/prediction_result_{year}.csv'.format(model_name=model_name,year=str(year))
+# test_data1 = 'E:/pythonProject/future/data/datafile/prediction_result/{model_name}/prediction_result_{year}.csv'.format(model_name=model_name,year=str(year))
 # df1 = pd.read_csv(test_data1)
 # df1.columns = ['date', 'code', 'predition', 'label_7', 'label_7_real', 'label_7_weight', 'label_7_max', 'label_7_max_real', 'label_7_max_weight', 'label_15', 'label_15_real', 'label_15_weight', 'label_15_max', 'label_15_max_real', 'label_15_max_weight']
 # # df1 = df1[df1['date']==20200126]
@@ -15,13 +15,13 @@ model_name = 'model_v4'
 # print(df)
 # print(df1)
 import os
-test_data = 'E:/pythonProject/stock/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name='tmp', year=str(2021))
+test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name='tmp', year=str(2021))
 if os.path.isfile(test_data):
 	os.remove(test_data)
 df = pd.read_csv(test_data)
 df = df[df['date']==20200120]
 print(df.shape)
-# df.to_csv('E:/pythonProject/stock/data/datafile/sample/{model_name}/train_sample_{year}_test.csv'.format(model_name=model_name,year=str(year)), mode='a', header=True, index=False, encoding='utf-8')
+# df.to_csv('E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}_test.csv'.format(model_name=model_name,year=str(year)), mode='a', header=True, index=False, encoding='utf-8')
 
 
 raw_k_data["tradestatus"] = pd.to_numeric(raw_k_data["tradestatus"], errors='coerce')

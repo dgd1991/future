@@ -10,7 +10,7 @@ pd.set_option('display.max_columns', 200)
 pd.set_option('display.width', 230)
 
 import numpy as np
-# quater_path = 'E:/pythonProject/stock/data/datafile/code_quarter_data_v2_all.csv'
+# quater_path = 'E:/pythonProject/future/data/datafile/code_quarter_data_v2_all.csv'
 # file = pd.read_csv(quater_path, encoding='utf-8', dtype={'industry': str})
 # # print(file.dtypes)
 # file = file["industry"].drop_duplicates()
@@ -24,13 +24,13 @@ import numpy as np
 # 		dict[name] = index
 # 		index += 1
 # dict["max"] = index - 1
-# np.save('E:/pythonProject/stock/common/industry_dict.npy', dict)  # 注意带上后缀名
+# np.save('E:/pythonProject/future/common/industry_dict.npy', dict)  # 注意带上后缀名
 #
 # # Load
-# load_dict = np.load('E:/pythonProject/stock/common/industry_dict.npy').item()
+# load_dict = np.load('E:/pythonProject/future/common/industry_dict.npy').item()
 # print(load_dict)
 
-file_name = 'E:/pythonProject/stock/data/datafile/code_k_data_v2_2007.csv'
+file_name = 'E:/pythonProject/future/data/datafile/code_k_data_v2_2007.csv'
 raw_k_data = pd.read_csv(file_name, encoding='utf-8')
 raw_k_data["tradestatus"] = pd.to_numeric(raw_k_data["tradestatus"], errors='coerce')
 raw_k_data["turn"] = pd.to_numeric(raw_k_data["turn"], errors='coerce')

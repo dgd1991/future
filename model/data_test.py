@@ -1,4 +1,4 @@
-import baostock as bs
+import baofuture as bs
 import pandas as pd
 import os
 import copy
@@ -6,7 +6,7 @@ from feature.feature_process import *
 
 bs.login()
 date='2022-06-17'
-# rs = bs.query_stock_industry(date="2006-01-02")
+# rs = bs.query_future_industry(date="2006-01-02")
 # industry_list = []
 rs_profit = bs.query_profit_data(code="sh.600367", year=2007, quarter=1)
 while (rs_profit.error_code == '0') & rs_profit.next():

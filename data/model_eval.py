@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 year = 2016
-df = pd.read_csv('E:/pythonProject/stock/data/datafile/prediction_result/prediction_result_{year}.csv'.format(year=str(year)), encoding='utf-8')
+df = pd.read_csv('E:/pythonProject/future/data/datafile/prediction_result/prediction_result_{year}.csv'.format(year=str(year)), encoding='utf-8')
 df.columns = ['date', 'code', 'predition_1d', 'predition_3d', 'predition_5d', 'predition_7d', 'label_1d', 'label_3d', 'label_5d', 'label_7d']
 # df = df.head(1000)
 df['date'] = df['date'].map(lambda x: x.replace('b', ''))

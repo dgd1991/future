@@ -65,7 +65,7 @@ def parse_feaconf(commonPath, modelName):
             line = fin.readline()
     return col_name, select_col, default_value_list, all_fea_config, feature_accuracy
 if __name__ == '__main__':
-    confPath = "E:/pythonProject/stock/common/"
+    confPath = "E:/pythonProject/future/common/"
     modelName = "model_v6"
     col_name, select_col, default_value_list, all_fea_config, feature_accuracy = parse_feaconf(confPath, modelName)
     with open(os.path.join(confPath, modelName + "_parsed"), "w") as fout:

@@ -31,7 +31,7 @@ class Sample(object):
 		sample.to_csv('{output_dir}/sample/{model_name}/train_sample_{year}.csv'.format(output_dir=self.output_dir, model_name=self.model_name, year=str(self.year)), mode='a',header=True, index=False, encoding='utf-8')
 
 if __name__ == '__main__':
-	base_path = 'E:/pythonProject/stock/data/datafile'
+	base_path = 'E:/pythonProject/future/data/datafile'
 	model_name = 'model_v3'
 	years = [2019, 2020, 2021]
 	for year in years:

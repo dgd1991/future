@@ -1,7 +1,7 @@
 import csv
 import gc
 
-import baostock as bs
+import baofuture as bs
 import pandas as pd
 import os
 import copy
@@ -40,25 +40,25 @@ class Downloader(object):
 
     def get_codes_by_date(self, date):
         print(date)
-        stock_rs = bs.query_all_stock(date)
-        stock_df = stock_rs.get_data()
-        print(stock_df)
-        return stock_df
+        future_rs = bs.query_all_future(date)
+        future_df = future_rs.get_data()
+        print(future_df)
+        return future_df
     def get_k_raw_data(self):
-        stock_df = self.get_codes_by_date(self.date_end)
-        for index, row in stock_df.iterrows():
+        future_df = self.get_codes_by_date(self.date_end)
+        for index, row in future_df.iterrows():
             index += 1
             print(row["code"])
             print(index)
             code_k_data = bs.query_history_k_data_plus(row["code"], self.fields, start_date=self.date_start, end_date=self.date_end, frequency="d", adjustflag="1").get_data()
             if len(code_k_data)>0:
-                if os.path.isfile('E:/pythonProject/stock/data/datafile/code_k_data.csv'):
+                if os.path.isfile('E:/pythonProject/future/data/datafile/code_k_data.csv'):
                     code_k_data.to_csv('{output_dir}/{code_k_data}.csv'.format(output_dir=self.output_dir, code_k_data='code_k_data'), mode='a', header=False, index=False)
                 else:
                     code_k_data.to_csv('{output_dir}/{code_k_data}.csv'.format(output_dir=self.output_dir, code_k_data='code_k_data'),mode='a', header=True, index=False)
 
     def get_industry_data(self):
-        rs = bs.query_stock_industry()
+        rs = bs.query_future_industry()
         industry_list = []
         while (rs.error_code == '0') & rs.next():
             # print(rs.get_row_data())
@@ -188,10 +188,10 @@ class Downloader(object):
             return None
 
     def get_quarter_data_all(self, year_start, year_end):
-        stock_df = self.get_codes_by_date(self.date_end)
+        future_df = self.get_codes_by_date(self.date_end)
         # quarter_data_list = []
         index = 0
-        for index, row in stock_df.iterrows():
+        for index, row in future_df.iterrows():
             quarter_data_list = []
             code = row["code"]
             index += 1
@@ -323,7 +323,7 @@ class Downloader(object):
         # gc.collect()
         # train_data = train_data.sort_values(by=['date', 'code'], ascending=True)
         # test_data = test_data.sort_values(by=['date', 'code'], ascending=True)
-        # train_data = pd.read_csv('E:/pythonProject/stock/data/datafile/train_data_category.csv')
+        # train_data = pd.read_csv('E:/pythonProject/future/data/datafile/train_data_category.csv')
         # train_data.to_csv('{output_dir}/{train_data}.csv'.format(output_dir=self.output_dir, train_data='train_data_category1'), mode='a',header=True, index=False, encoding='utf-8')
         # del train_data
         # gc.collect()
@@ -335,11 +335,11 @@ class Downloader(object):
         #     else:
         #         f.readline()
         # f = open('{output_dir}/{test_data}.csv'.format(output_dir=self.output_dir, test_data='test_data_category1'), mode='a', encoding='utf-8', newline="")
-        # test_data = pd.read_csv('E:/pythonProject/stock/data/datafile/test_data_category1.csv')
+        # test_data = pd.read_csv('E:/pythonProject/future/data/datafile/test_data_category1.csv')
         # test_data = test_data.iloc[0:10000,:]
         # test_data.to_csv('{output_dir}/{train_data}.csv'.format(output_dir=self.output_dir, train_data='test_data_category1'), mode='a',header=True, index=False, encoding='utf-8')
 
-        with open('E:/pythonProject/stock/data/datafile/egg.csv', mode='w+', encoding='utf-8-sig', newline='') as csvfile:
+        with open('E:/pythonProject/future/data/datafile/egg.csv', mode='w+', encoding='utf-8-sig', newline='') as csvfile:
             spamwriter = csv.writer(csvfile, dialect='excel')
             spamwriter.writerow(['a', '1', '1', '2', '2'])
             spamwriter.writerow(['b', '3', '3', '6', '4'])
@@ -352,11 +352,11 @@ class Downloader(object):
 if __name__ == '__main__':
     mkdir('./datafile')
     downloader = Downloader('./datafile/', date_start='2019-01-01', date_end='2022-04-21')
-    k_file_name = 'E:/pythonProject/stock/data/datafile/code_k_data.csv'
-    industry_file_name = 'E:/pythonProject/stock/data/datafile/industry_data.csv'
-    quarter_file_name = 'E:/pythonProject/stock/data/datafile/quarter_data.csv'
-    feature_file = 'E:/pythonProject/stock/data/datafile/feature_all.csv'
-    label_file = 'E:/pythonProject/stock/data/datafile/label.csv'
+    k_file_name = 'E:/pythonProject/future/data/datafile/code_k_data.csv'
+    industry_file_name = 'E:/pythonProject/future/data/datafile/industry_data.csv'
+    quarter_file_name = 'E:/pythonProject/future/data/datafile/quarter_data.csv'
+    feature_file = 'E:/pythonProject/future/data/datafile/feature_all.csv'
+    label_file = 'E:/pythonProject/future/data/datafile/label.csv'
     # downloader.get_k_raw_data()
     # downloader.get_industry_data()
     # downloader.get_quarter_data_all(2018, 2022)

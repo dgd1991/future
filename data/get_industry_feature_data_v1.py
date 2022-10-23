@@ -246,10 +246,10 @@ class Feature(object):
 if __name__ == '__main__':
 	years = [2010, 2011, 2012, 2013, 2014, 2015, 2016]
 	for year in years:
-		path = 'E:/pythonProject/stock/data/datafile/code_k_data_v2_'
-		quater_path = 'E:/pythonProject/stock/data/datafile/code_quarter_data_v2_all.csv'
+		path = 'E:/pythonProject/future/data/datafile/code_k_data_v2_'
+		quater_path = 'E:/pythonProject/future/data/datafile/code_quarter_data_v2_all.csv'
 		feature = Feature(path, year, quater_path)
 		feature_all = feature.feature_process()
-		feature_all.to_csv('E:/pythonProject/stock/data/datafile/feature/{year}_feature.csv'.format(year=str(year)),
+		feature_all.to_csv('E:/pythonProject/future/data/datafile/feature/{year}_feature.csv'.format(year=str(year)),
 		                 mode='w', header=True, index=False)
 

@@ -10,15 +10,15 @@ from tensorflow.core.util.event_pb2 import SessionLog
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 class DeepFM(object):
     def __init__(self):
-        self.k_file_name = 'E:/pythonProject/stock/data/datafile/code_k_data.csv'
-        self.industry_file_name = 'E:/pythonProject/stock/data/datafile/industry_data.csv'
-        self.quarter_file_name = 'E:/pythonProject/stock/data/datafile/quarter_data.csv'
-        self.feature_file = 'E:/pythonProject/stock/data/datafile/feature_all.csv'
-        self.label_file = 'E:/pythonProject/stock/data/datafile/label.csv'
-        self.train_data = 'E:/pythonProject/stock/data/datafile/train_data_category.csv'
-        self.test_data = 'E:/pythonProject/stock/data/datafile/test_data_category.csv'
+        self.k_file_name = 'E:/pythonProject/future/data/datafile/code_k_data.csv'
+        self.industry_file_name = 'E:/pythonProject/future/data/datafile/industry_data.csv'
+        self.quarter_file_name = 'E:/pythonProject/future/data/datafile/quarter_data.csv'
+        self.feature_file = 'E:/pythonProject/future/data/datafile/feature_all.csv'
+        self.label_file = 'E:/pythonProject/future/data/datafile/label.csv'
+        self.train_data = 'E:/pythonProject/future/data/datafile/train_data_category.csv'
+        self.test_data = 'E:/pythonProject/future/data/datafile/test_data_category.csv'
         self.task_type = 'predict'
-        self.checkpoint_path = 'E:/pythonProject/stock/saved_model'
+        self.checkpoint_path = 'E:/pythonProject/future/saved_model'
         self.save_summary_steps = 1000
         self.save_checkpoint_and_eval_step = 1000
         self.every_n_steps = 1000
@@ -306,7 +306,7 @@ class DeepFM(object):
 #         print('end')
 
 if __name__ == "__main__":
-    # rm -r E:/pythonProject/stock/saved_model/*
+    # rm -r E:/pythonProject/future/saved_model/*
     # main()
     model = DeepFM()
     model.run()

@@ -1,4 +1,4 @@
-import baostock as bs
+import baofuture as bs
 import pandas as pd
 import os
 import copy
@@ -25,8 +25,8 @@ class DownloadDayDataSet(object):
                  date_end='2022-03-11'):
         self._bs = bs
         bs.login()
-        self.stock_df = self.get_codes_by_date(date_end)
-        assert (len(self.stock_df) > 0)
+        self.future_df = self.get_codes_by_date(date_end)
+        assert (len(self.future_df) > 0)
         self.date_start = date_start
         # self.date_end = datetime.datetime.now().strftime("%Y-%m-%d")
         self.date_end = date_end
@@ -38,14 +38,14 @@ class DownloadDayDataSet(object):
 
     # 获取当天的所有可交易的股票dataframe，包含code，tradeStatus，code_name
     def get_codes_by_date(self, date):
-        stock_rs = bs.query_all_stock(date)
-        stock_df = stock_rs.get_data()
-        return stock_df
+        future_rs = bs.query_all_future(date)
+        future_df = future_rs.get_data()
+        return future_df
 
     def get_k_raw_data(self):
-        # stock_df是指当天的所有可交易的股票dataframe
+        # future_df是指当天的所有可交易的股票dataframe
         df_list = []
-        for index, row in self.stock_df.iterrows():
+        for index, row in self.future_df.iterrows():
             index += 1
             print(row["code"])
             print(index)
@@ -55,7 +55,7 @@ class DownloadDayDataSet(object):
         return df
 
     def get_industry_data(self):
-        rs = bs.query_stock_industry()
+        rs = bs.query_future_industry()
         industry_list = []
         while (rs.error_code == '0') & rs.next():
             # print(rs.get_row_data())
@@ -185,12 +185,12 @@ class DownloadDayDataSet(object):
             return None
 
     def get_quarter_data_all(self):
-        stock_df = self.get_codes_by_date(self.date_end)
+        future_df = self.get_codes_by_date(self.date_end)
         quarter_data_list = []
         index = 0
         quarter = get_date_quarter(self.date_end.split('-')[0], self.date_end.split('-')[1], False)
         previous_quarter = get_date_previous_quarter(self.date_end.split('-')[0], self.date_end.split('-')[1])
-        for index, row in stock_df.iterrows():
+        for index, row in future_df.iterrows():
             code = row["code"]
             quarter_data = self.get_quarter_data(code, get_date_previous_quarter(self.date_end.split('-')[0],self.date_end.split('-')[1], False))
             if quarter_data is not None:
@@ -339,11 +339,11 @@ class DownloadDayDataSet(object):
 if __name__ == '__main__':
     mkdir('./datafile')
     downloader = Downloader('./datafile/', date_start='2019-01-01', date_end='2022-04-21')
-    k_file_name = 'E:/pythonProject/stock/datafile/code_k_data.csv'
-    industry_file_name = 'E:/pythonProject/stock/datafile/industry_data.csv'
-    quarter_file_name = 'E:/pythonProject/stock/datafile/quarter_data.csv'
-    feature_file = 'E:/pythonProject/stock/datafile/feature_all.csv'
-    label_file = 'E:/pythonProject/stock/datafile/label.csv'
+    k_file_name = 'E:/pythonProject/future/datafile/code_k_data.csv'
+    industry_file_name = 'E:/pythonProject/future/datafile/industry_data.csv'
+    quarter_file_name = 'E:/pythonProject/future/datafile/quarter_data.csv'
+    feature_file = 'E:/pythonProject/future/datafile/feature_all.csv'
+    label_file = 'E:/pythonProject/future/datafile/label.csv'
     # downloader.get_k_raw_data()
     # downloader.get_industry_data()
     downloader.get_quarter_data_all(2018, 2022)

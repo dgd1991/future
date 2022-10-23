@@ -14,21 +14,21 @@ from tensorflow.core.util.event_pb2 import SessionLog
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 class DeepFM(object):
     def __init__(self, year, train_stype, model_name):
-        # self.train_data = 'E:/pythonProject/stock/data/datafile/sample/{model_name}'.format(model_name=model_name)
-        # self.test_data = 'E:/pythonProject/stock/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name='tmp', year=str(2021))
+        # self.train_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}'.format(model_name=model_name)
+        # self.test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name='tmp', year=str(2021))
         self.train_data = []
-        self.train_data = 'E:/pythonProject/stock/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+        self.train_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
         # for index in range(10):
-        #     self.train_data.append('E:/pythonProject/stock/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(
+        #     self.train_data.append('E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(
         #         model_name=model_name, year=str(index + 2008)))
 
-        # self.train_data = 'E:/pythonProject/stock/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
-        # self.test_data = 'E:/pythonProject/stock/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year+1))
-        self.test_data = 'E:/pythonProject/stock/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year+1))
-        self.prediction_result = 'E:/pythonProject/stock/data/datafile/prediction_result/{model_name}/prediction_result_{year}.csv'.format(model_name=model_name, year=str(year+1))
+        # self.train_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+        # self.test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year+1))
+        self.test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year+1))
+        self.prediction_result = 'E:/pythonProject/future/data/datafile/prediction_result/{model_name}/prediction_result_{year}.csv'.format(model_name=model_name, year=str(year+1))
         self.task_type = train_stype
-        # self.checkpoint_path = "E:/pythonProject/stock/saved_model"
-        self.checkpoint_path = "E:\\pythonProject\\stock\\saved_model\\{model_name}".format(model_name=str(model_name))
+        # self.checkpoint_path = "E:/pythonProject/future/saved_model"
+        self.checkpoint_path = "E:\\pythonProject\\future\\saved_model\\{model_name}".format(model_name=str(model_name))
         self.save_summary_steps = 100000
         self.save_checkpoint_and_eval_step = 100000
         self.every_n_steps = 100000
@@ -355,8 +355,8 @@ class DeepFM(object):
 def main():
     model = DeepFM(2009)
     features_batch, label_batch = model.train_input_fn_from_csv(data_path=model.test_data, epoch=1, batch_size=3)
-    # path = 'E:/pythonProject/stock/data/datafile/test1'
-    path = 'E:/pythonProject/stock/data/datafile/test2.csv'
+    # path = 'E:/pythonProject/future/data/datafile/test1'
+    path = 'E:/pythonProject/future/data/datafile/test2.csv'
     # features_batch, label_batch = model.train_input_fn_from_csv_test(data_path=model.test_data, epoch=1, batch_size=3)
     # dataset = model.train_input_fn_from_csv_test(data_path=path, epoch=1, batch_size=3)
 
@@ -379,7 +379,7 @@ def main():
         print('end')
 
 if __name__ == "__main__":
-    # rm -r E:/pythonProject/stock/saved_model/*
+    # rm -r E:/pythonProject/future/saved_model/*
     # main()
     # tf.test.is_gpu_available()
     # years = [2011, 2012, 2013, 2014]
