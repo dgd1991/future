@@ -425,10 +425,10 @@ if __name__ == "__main__":
             model.lr = 0.0001
             model.run()
 
-            # model.task_type = 'predict'
-            # if os.path.isfile(model.prediction_result):
-            #     os.remove(model.prediction_result)
-            # model.run()
+            model.task_type = 'predict'
+            if os.path.isfile(model.prediction_result):
+                os.remove(model.prediction_result)
+            model.run()
         # model = DeepFM(year, 'predict', model_name, saved_model_name)
         # if os.path.isfile(model.prediction_result):
         #     os.remove(model.prediction_result)
