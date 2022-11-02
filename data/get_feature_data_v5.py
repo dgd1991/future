@@ -1,5 +1,6 @@
 import copy
 import gc
+import os
 from itertools import zip_longest
 
 import pandas as pd
@@ -396,13 +397,15 @@ class Feature(object):
 
 		return feature_all
 if __name__ == '__main__':
-	years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022]
-	# years = [2008]
+	# years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022]
+	years = [2022]
 	for year in years:
 		path = 'E:/pythonProject/future/data/datafile/raw_feature/code_k_data_v4_'
 		quater_path = 'E:/pythonProject/future/data/datafile/code_quarter_data_v2_all.csv'
+		output_path = 'E:/pythonProject/future/data/datafile/feature/{year}_feature_v5.csv'.format(year=str(year))
 		feature = Feature(path, year, quater_path)
+		if os.path.isfile(output_path):
+			os.remove(output_path)
 		feature_all = feature.feature_process()
 		# print(feature_all)
-		feature_all.to_csv('E:/pythonProject/future/data/datafile/feature/{year}_feature_v5.csv'.format(year=str(year)),
-		                 mode='w', header=True, index=False)
+		feature_all.to_csv(output_path, mode='w', header=True, index=False)
