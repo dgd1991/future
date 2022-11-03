@@ -26,6 +26,8 @@ class Sample(object):
 		# if self.year == 2008:
 		# 	feature['date'] = pd.to_datetime(feature["date"], errors='coerce')
 		sample = feature
+		sample = sample[sample['date'] == self.date]
+		sample = sample[sample['code_market'] != 4]
 		sample['label_7'] = 0
 		sample['label_7_real'] = 0
 		sample['label_7_weight'] = 0
@@ -42,7 +44,6 @@ class Sample(object):
 		del feature
 		gc.collect()
 		sample = sample.sort_values(by=['date', 'code'], ascending=True)
-		sample = sample[sample['date'] == self.date]
 		sample.to_csv('{output_dir}/prediction_sample/{model_name}/prediction_sample_{date}.csv'.format(output_dir=self.output_dir, model_name=self.model_name, date=str(self.date)), mode='a',header=True, index=False, encoding='utf-8')
 if __name__ == '__main__':
 	base_path = 'E:/pythonProject/future/data/datafile'

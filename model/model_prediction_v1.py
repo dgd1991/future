@@ -404,6 +404,16 @@ if __name__ == "__main__":
     model_name = 'model_v5'
     saved_model_name = 'saved_model_v12'
     epoch = 1
+    train_data_path_raw = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+    train_data_path = 'E:/pythonProject/future/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+    train_data_raw = pd.read_csv(train_data_path_raw).sample(frac=1)
+    if os.path.isfile(train_data_path):
+        os.remove(train_data_path)
+    train_data_raw.to_csv(train_data_path, mode='a', header=True, index=False, encoding='utf-8')
+    model = DeepFM(year, date, 'train', model_name, saved_model_name)
+    model.lr = 0.0001
+    model.run()
+
     model = DeepFM(year, date,  'predict', model_name, saved_model_name)
     if os.path.isfile(model.prediction_result):
         os.remove(model.prediction_result)
