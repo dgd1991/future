@@ -68,6 +68,30 @@ class Tools(object):
         else:
             return 'unknow.' + code
 
+    def code_market(self, code):
+        if code.startswith('sz.300'):
+            return 3
+        elif code.startswith('sh.60'):
+            return 1
+        elif code.startswith('sz.000'):
+            return 2
+        elif code.startswith('sh.688'):
+            return 1
+        elif code.startswith('sh.689'):
+            return 1
+        else:
+            return 0
+
+    def zh_code_market(self, code):
+        if code.startswith('sz.399006'):
+            return 3
+        elif code.startswith('sh.000001'):
+            return 1
+        elif code.startswith('sz.399001'):
+            return 2
+        else:
+            return 0
+
     def sw_date_to_bs_date(self, date):
         date_arr = date.split('/')
         year = date_arr[0]
