@@ -400,7 +400,7 @@ def main():
 
 if __name__ == "__main__":
     year = 2022
-    date = 20221103
+    date = 20221110
     model_name = 'model_v5'
     saved_model_name = 'saved_model_v12'
     # epoch = 1

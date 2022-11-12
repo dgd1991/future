@@ -2,7 +2,7 @@ import pandas as pd
 # year = '2021'
 month = '12'
 day = '32'
-years = [2022]
+years = [2007]
 for year in years:
 	year = str(year)
 	file_name = 'E:/pythonProject/future/data/datafile/raw_feature/code_k_data_v4_' + year + '.csv'

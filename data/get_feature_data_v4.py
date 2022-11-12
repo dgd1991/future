@@ -1,5 +1,6 @@
 import copy
 import gc
+import os
 from itertools import zip_longest
 
 import pandas as pd
@@ -42,7 +43,9 @@ class Feature(object):
 		raw_k_data['high_ratio'] = ((raw_k_data['high'] - raw_k_data['preclose']) / raw_k_data['preclose'])
 		raw_k_data['low_ratio'] = ((raw_k_data['low'] - raw_k_data['preclose']) / raw_k_data['preclose'])
 		raw_k_data['amount'] = raw_k_data['amount']
-		raw_k_data['pctChg'] = raw_k_data['pctChg']
+		raw_k_data['pctChg'] = raw_k_data['pctChg'].map(lambda x: x/100.0)
+		raw_k_data['code_market'] = raw_k_data['code'].map(lambda x: 3 if x.startswith('sz.300') else (1 if x.startswith('sh.60') else (2 if x.startswith('sz.000') else 4)))
+
 		raw_k_data['peTTM'] = raw_k_data['peTTM']
 		raw_k_data['pcfNcfTTM'] = raw_k_data['pcfNcfTTM']
 		raw_k_data['pbMRQ'] = raw_k_data['pbMRQ']
@@ -50,7 +53,7 @@ class Feature(object):
 
 		raw_k_data = raw_k_data.groupby('code').apply(lambda x: x.set_index('date'))
 
-		feature_all = copy.deepcopy(raw_k_data[['industry','open_ratio','close_ratio','high_ratio','low_ratio']])
+		feature_all = copy.deepcopy(raw_k_data[['industry','open_ratio','close_ratio','high_ratio','low_ratio','pctChg','code_market']])
 		feature_all['open_ratio_7d_avg'] = raw_k_data.groupby(level=0)['open_ratio'].apply(lambda x: x.rolling(min_periods=1, window=7, center=False).mean())
 		feature_all['close_ratio_7d_avg'] = raw_k_data.groupby(level=0)['close_ratio'].apply(lambda x: x.rolling(min_periods=1, window=7, center=False).mean())
 		feature_all['high_ratio_7d_avg'] = raw_k_data.groupby(level=0)['high_ratio'].apply(lambda x: x.rolling(min_periods=1, window=7, center=False).mean())
@@ -202,6 +205,7 @@ class Feature(object):
 		raw_k_data["low"] = raw_k_data["low"]*raw_k_data['volume_total_ratio']
 		raw_k_data["turn"] = raw_k_data["turn"]*raw_k_data['volume_total_ratio']
 		raw_k_data["amount"] = raw_k_data["amount"]*raw_k_data['volume_total_ratio']
+		raw_k_data['pctChg'] = raw_k_data['pctChg'].map(lambda x: x/100.0)
 		raw_k_data["pctChg"] = raw_k_data["pctChg"]*raw_k_data['volume_total_ratio']
 		raw_k_data["peTTM"] = raw_k_data["peTTM"]*raw_k_data['volume_total_ratio']
 		raw_k_data["pcfNcfTTM"] = raw_k_data["pcfNcfTTM"]*raw_k_data['volume_total_ratio']
@@ -333,18 +337,75 @@ class Feature(object):
 
 		feature_all = pd.merge(feature_all, industry_k_data, how="left", left_on=["date",'industry'],right_on=["date",'industry'])
 		feature_all = feature_all.sort_values(['date', 'code'])
+		del industry_k_data
 		gc.collect()
+
+		# 大盘趋势类特征
+		raw_k_data = pd.read_csv(self.k_file_path)
+		raw_k_data_his = pd.read_csv(self.k_file_path_his)
+		raw_k_data = pd.concat([raw_k_data_his, raw_k_data], axis=0)
+		del raw_k_data_his
+		gc.collect()
+		raw_k_data["tradestatus"] = pd.to_numeric(raw_k_data["tradestatus"], errors='coerce')
+		raw_k_data["turn"] = pd.to_numeric(raw_k_data["turn"], errors='coerce')
+		raw_k_data["pctChg"] = pd.to_numeric(raw_k_data["pctChg"], errors='coerce')
+		raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] <= 20) & (raw_k_data['pctChg'] >= -20)]
+		raw_k_data["open"] = pd.to_numeric(raw_k_data["open"], errors='coerce')
+		raw_k_data["close"] = pd.to_numeric(raw_k_data["close"], errors='coerce')
+		raw_k_data["pctChg"] = pd.to_numeric(raw_k_data["pctChg"], errors='coerce')
+		raw_k_data["preclose"] = pd.to_numeric(raw_k_data["preclose"], errors='coerce')
+		raw_k_data["high"] = pd.to_numeric(raw_k_data["high"], errors='coerce')
+		raw_k_data["low"] = pd.to_numeric(raw_k_data["low"], errors='coerce')
+		raw_k_data['date'] = pd.to_datetime(raw_k_data['date'])
+		raw_k_data['open_ratio'] = ((raw_k_data['open'] - raw_k_data['preclose']) / raw_k_data['preclose'])
+		raw_k_data['close_ratio'] = ((raw_k_data['close'] - raw_k_data['open']) / raw_k_data['open'])
+		raw_k_data['high_ratio'] = ((raw_k_data['high'] - raw_k_data['preclose']) / raw_k_data['preclose'])
+		raw_k_data['low_ratio'] = ((raw_k_data['low'] - raw_k_data['preclose']) / raw_k_data['preclose'])
+		raw_k_data['amount'] = raw_k_data['amount']
+		raw_k_data['pctChg'] = raw_k_data['pctChg'].map(lambda x: x / 100.0)
+		raw_k_data['rise_ratio'] = raw_k_data['pctChg'].map(lambda x: 1 if x>0 else 0)
+		raw_k_data['peTTM'] = raw_k_data['peTTM']
+		raw_k_data['pcfNcfTTM'] = raw_k_data['pcfNcfTTM']
+		raw_k_data['pbMRQ'] = raw_k_data['pbMRQ']
+		raw_k_data['isST'] = raw_k_data['isST']
+
+		all_data_raw = raw_k_data[['date', 'pctChg', 'turn', 'rise_ratio']].groupby('date').mean()
+		all_data_raw.columns = ['all_pctChg', 'all_turn', 'all_rise_ratio']
+		# all_data_raw = all_data_raw.reset_index(level=0, drop=False)
+		day_cnt_list = [3, 5, 10]
+		for index in range(len(day_cnt_list)):
+			day_cnt = day_cnt_list[index]
+			all_data_raw['all_pctChg_' + str(day_cnt)] = all_data_raw['all_pctChg'].rolling(min_periods=1, window=day_cnt, center=False).mean()
+			all_data_raw['all_turn_' + str(day_cnt)] = all_data_raw['all_turn'].rolling(min_periods=1, window=day_cnt, center=False).mean()
+			all_data_raw['all_rise_ratio_' + str(day_cnt)] = all_data_raw['all_rise_ratio'].rolling(min_periods=1, window=day_cnt, center=False).mean()
+		all_data_raw['all_turn'] = all_data_raw['all_turn'].map(lambda x: float2Bucket(float(x), 1, 0, 200, 200))
+		for index in range(len(day_cnt_list)):
+			day_cnt = day_cnt_list[index]
+			all_data_raw['all_turn_' + str(day_cnt)] = all_data_raw['all_turn_' + str(day_cnt)].map(lambda x: float2Bucket(float(x), 1, 0, 200, 200))
+
+		all_data_raw = all_data_raw.reset_index(level=0, drop=False)
+		zs_data = feature_all[(feature_all['code'] == 'sh.000001') | (feature_all['code'] == 'sz.399001') | (feature_all['code'] == 'sz.399006')]
+		zs_data = zs_data[['date','code','open_ratio','close_ratio','high_ratio','low_ratio','pctChg','open_ratio_7d_avg','close_ratio_7d_avg','high_ratio_7d_avg','low_ratio_7d_avg','amount','peTTM','pcfNcfTTM','pbMRQ','isST','turn','rsv_5','k_value_5','d_value_5','j_value_5','k_value_trend_5','kd_value5','rsv_9','k_value_9','d_value_9','j_value_9','k_value_trend_9','kd_value9','rsv_19','k_value_19','d_value_19','j_value_19','k_value_trend_19','kd_value19','rsv_73','k_value_73','d_value_73','j_value_73','k_value_trend_73','kd_value73','macd_positive','macd_dif_ratio','macd_dif_2','macd_dea_2','macd_2','macd_positive_ratio_2','macd_dif_3','macd_dea_3','macd_3','macd_positive_ratio_3','macd_dif_5','macd_dea_5','macd_5','macd_positive_ratio_5','macd_dif_10','macd_dea_10','macd_10','macd_positive_ratio_10','macd_dif_20','macd_dea_20','macd_20','macd_positive_ratio_20','macd_dif_40','macd_dea_40','macd_40','macd_positive_ratio_40','macd_dif_dea','width_20','close_mb20_diff','cr_3d','cr_5d','cr_10d','cr_20d','cr_40d','rsi_3d','rsi_5d','rsi_10d','rsi_20d','rsi_40d','turn_3d_avg','turn_3davg_dif','turn_3dmax_dif','turn_3dmin_dif','close_3davg_dif','close_3dmax_dif','close_3dmin_dif','close_3d_dif','turn_5d_avg','turn_5davg_dif','turn_5dmax_dif','turn_5dmin_dif','turn_3_5d_avg','close_5davg_dif','close_5dmax_dif','close_5dmin_dif','close_5d_dif','close_3_5d_avg','turn_10d_avg','turn_10davg_dif','turn_10dmax_dif','turn_10dmin_dif','turn_5_10d_avg','close_10davg_dif','close_10dmax_dif','close_10dmin_dif','close_10d_dif','close_5_10d_avg','turn_20d_avg','turn_20davg_dif','turn_20dmax_dif','turn_20dmin_dif','turn_10_20d_avg','close_20davg_dif','close_20dmax_dif','close_20dmin_dif','close_20d_dif','close_10_20d_avg','turn_30d_avg','turn_30davg_dif','turn_30dmax_dif','turn_30dmin_dif','turn_20_30d_avg','close_30davg_dif','close_30dmax_dif','close_30dmin_dif','close_30d_dif','close_20_30d_avg','turn_60d_avg','turn_60davg_dif','turn_60dmax_dif','turn_60dmin_dif','turn_30_60d_avg','close_60davg_dif','close_60dmax_dif','close_60dmin_dif','close_60d_dif','close_30_60d_avg','turn_120d_avg','turn_120davg_dif','turn_120dmax_dif','turn_120dmin_dif','turn_60_120d_avg','close_120davg_dif','close_120dmax_dif','close_120dmin_dif','close_120d_dif','close_60_120d_avg','turn_240d_avg','turn_240davg_dif','turn_240dmax_dif','turn_240dmin_dif','turn_120_240d_avg','close_240davg_dif','close_240dmax_dif','close_240dmin_dif','close_240d_dif','close_120_240d_avg']]
+		zs_data['code_market'] = zs_data['code'].map(lambda x: 3 if x=='sz.399006' else (1 if x=='sh.000001' else (2 if x=='sz.399001' else 4)))
+		zs_data = zs_data[['date','code_market','open_ratio','close_ratio','high_ratio','low_ratio','pctChg','open_ratio_7d_avg','close_ratio_7d_avg','high_ratio_7d_avg','low_ratio_7d_avg','amount','turn','rsv_5','k_value_5','d_value_5','j_value_5','k_value_trend_5','kd_value5','rsv_9','k_value_9','d_value_9','j_value_9','k_value_trend_9','kd_value9','rsv_19','k_value_19','d_value_19','j_value_19','k_value_trend_19','kd_value19','rsv_73','k_value_73','d_value_73','j_value_73','k_value_trend_73','kd_value73','macd_positive','macd_dif_ratio','macd_dif_2','macd_dea_2','macd_2','macd_positive_ratio_2','macd_dif_3','macd_dea_3','macd_3','macd_positive_ratio_3','macd_dif_5','macd_dea_5','macd_5','macd_positive_ratio_5','macd_dif_10','macd_dea_10','macd_10','macd_positive_ratio_10','macd_dif_20','macd_dea_20','macd_20','macd_positive_ratio_20','macd_dif_40','macd_dea_40','macd_40','macd_positive_ratio_40','macd_dif_dea','width_20','close_mb20_diff','cr_3d','cr_5d','cr_10d','cr_20d','cr_40d','rsi_3d','rsi_5d','rsi_10d','rsi_20d','rsi_40d','turn_3d_avg','turn_3davg_dif','turn_3dmax_dif','turn_3dmin_dif','close_3davg_dif','close_3dmax_dif','close_3dmin_dif','close_3d_dif','turn_5d_avg','turn_5davg_dif','turn_5dmax_dif','turn_5dmin_dif','turn_3_5d_avg','close_5davg_dif','close_5dmax_dif','close_5dmin_dif','close_5d_dif','close_3_5d_avg','turn_10d_avg','turn_10davg_dif','turn_10dmax_dif','turn_10dmin_dif','turn_5_10d_avg','close_10davg_dif','close_10dmax_dif','close_10dmin_dif','close_10d_dif','close_5_10d_avg','turn_20d_avg','turn_20davg_dif','turn_20dmax_dif','turn_20dmin_dif','turn_10_20d_avg','close_20davg_dif','close_20dmax_dif','close_20dmin_dif','close_20d_dif','close_10_20d_avg','turn_30d_avg','turn_30davg_dif','turn_30dmax_dif','turn_30dmin_dif','turn_20_30d_avg','close_30davg_dif','close_30dmax_dif','close_30dmin_dif','close_30d_dif','close_20_30d_avg','turn_60d_avg','turn_60davg_dif','turn_60dmax_dif','turn_60dmin_dif','turn_30_60d_avg','close_60davg_dif','close_60dmax_dif','close_60dmin_dif','close_60d_dif','close_30_60d_avg','turn_120d_avg','turn_120davg_dif','turn_120dmax_dif','turn_120dmin_dif','turn_60_120d_avg','close_120davg_dif','close_120dmax_dif','close_120dmin_dif','close_120d_dif','close_60_120d_avg','turn_240d_avg','turn_240davg_dif','turn_240dmax_dif','turn_240dmin_dif','turn_120_240d_avg','close_240davg_dif','close_240dmax_dif','close_240dmin_dif','close_240d_dif','close_120_240d_avg']]
+		zs_data.columns = ['date','code_market','zs_open_ratio','zs_close_ratio','zs_high_ratio','zs_low_ratio','zs_pctChg','zs_open_ratio_7d_avg','zs_close_ratio_7d_avg','zs_high_ratio_7d_avg','zs_low_ratio_7d_avg','zs_amount','zs_turn','zs_rsv_5','zs_k_value_5','zs_d_value_5','zs_j_value_5','zs_k_value_trend_5','zs_kd_value5','zs_rsv_9','zs_k_value_9','zs_d_value_9','zs_j_value_9','zs_k_value_trend_9','zs_kd_value9','zs_rsv_19','zs_k_value_19','zs_d_value_19','zs_j_value_19','zs_k_value_trend_19','zs_kd_value19','zs_rsv_73','zs_k_value_73','zs_d_value_73','zs_j_value_73','zs_k_value_trend_73','zs_kd_value73','zs_macd_positive','zs_macd_dif_ratio','zs_macd_dif_2','zs_macd_dea_2','zs_macd_2','zs_macd_positive_ratio_2','zs_macd_dif_3','zs_macd_dea_3','zs_macd_3','zs_macd_positive_ratio_3','zs_macd_dif_5','zs_macd_dea_5','zs_macd_5','zs_macd_positive_ratio_5','zs_macd_dif_10','zs_macd_dea_10','zs_macd_10','zs_macd_positive_ratio_10','zs_macd_dif_20','zs_macd_dea_20','zs_macd_20','zs_macd_positive_ratio_20','zs_macd_dif_40','zs_macd_dea_40','zs_macd_40','zs_macd_positive_ratio_40','zs_macd_dif_dea','zs_width_20','zs_close_mb20_diff','zs_cr_3d','zs_cr_5d','zs_cr_10d','zs_cr_20d','zs_cr_40d','zs_rsi_3d','zs_rsi_5d','zs_rsi_10d','zs_rsi_20d','zs_rsi_40d','zs_turn_3d_avg','zs_turn_3davg_dif','zs_turn_3dmax_dif','zs_turn_3dmin_dif','zs_close_3davg_dif','zs_close_3dmax_dif','zs_close_3dmin_dif','zs_close_3d_dif','zs_turn_5d_avg','zs_turn_5davg_dif','zs_turn_5dmax_dif','zs_turn_5dmin_dif','zs_turn_3_5d_avg','zs_close_5davg_dif','zs_close_5dmax_dif','zs_close_5dmin_dif','zs_close_5d_dif','zs_close_3_5d_avg','zs_turn_10d_avg','zs_turn_10davg_dif','zs_turn_10dmax_dif','zs_turn_10dmin_dif','zs_turn_5_10d_avg','zs_close_10davg_dif','zs_close_10dmax_dif','zs_close_10dmin_dif','zs_close_10d_dif','zs_close_5_10d_avg','zs_turn_20d_avg','zs_turn_20davg_dif','zs_turn_20dmax_dif','zs_turn_20dmin_dif','zs_turn_10_20d_avg','zs_close_20davg_dif','zs_close_20dmax_dif','zs_close_20dmin_dif','zs_close_20d_dif','zs_close_10_20d_avg','zs_turn_30d_avg','zs_turn_30davg_dif','zs_turn_30dmax_dif','zs_turn_30dmin_dif','zs_turn_20_30d_avg','zs_close_30davg_dif','zs_close_30dmax_dif','zs_close_30dmin_dif','zs_close_30d_dif','zs_close_20_30d_avg','zs_turn_60d_avg','zs_turn_60davg_dif','zs_turn_60dmax_dif','zs_turn_60dmin_dif','zs_turn_30_60d_avg','zs_close_60davg_dif','zs_close_60dmax_dif','zs_close_60dmin_dif','zs_close_60d_dif','zs_close_30_60d_avg','zs_turn_120d_avg','zs_turn_120davg_dif','zs_turn_120dmax_dif','zs_turn_120dmin_dif','zs_turn_60_120d_avg','zs_close_120davg_dif','zs_close_120dmax_dif','zs_close_120dmin_dif','zs_close_120d_dif','zs_close_60_120d_avg','zs_turn_240d_avg','zs_turn_240davg_dif','zs_turn_240dmax_dif','zs_turn_240dmin_dif','zs_turn_120_240d_avg','zs_close_240davg_dif','zs_close_240dmax_dif','zs_close_240dmin_dif','zs_close_240d_dif','zs_close_120_240d_avg']
+		all_data_raw = pd.merge(all_data_raw, zs_data, how="left", left_on=["date"],right_on=["date"])
+
+		feature_all = pd.merge(feature_all, all_data_raw, how="left", left_on=["date",'code_market'],right_on=["date",'code_market'])
+
+		feature_all = feature_all.round({'open_ratio ': 5, 'close_ratio ': 5, 'high_ratio ': 5, 'low_ratio ': 5, 'pctChg ': 5, 'open_ratio_7d_avg ': 5, 'close_ratio_7d_avg ': 5, 'high_ratio_7d_avg ': 5, 'low_ratio_7d_avg ': 5, 'rsv_5 ': 5, 'k_value_5 ': 5, 'd_value_5 ': 5, 'j_value_5 ': 5, 'k_value_trend_5 ': 5, 'rsv_9 ': 5, 'k_value_9 ': 5, 'd_value_9 ': 5, 'j_value_9 ': 5, 'k_value_trend_9 ': 5, 'rsv_19 ': 5, 'k_value_19 ': 5, 'd_value_19 ': 5, 'j_value_19 ': 5, 'k_value_trend_19 ': 5, 'rsv_73 ': 5, 'k_value_73 ': 5, 'd_value_73 ': 5, 'j_value_73 ': 5, 'k_value_trend_73 ': 5, 'macd_dif_ratio ': 5, 'macd_positive_ratio_2 ': 5, 'macd_positive_ratio_3 ': 5, 'macd_positive_ratio_5 ': 5, 'macd_positive_ratio_10 ': 5, 'macd_positive_ratio_20 ': 5, 'macd_positive_ratio_40 ': 5, 'width_20 ': 5, 'close_mb20_diff ': 5, 'rsi_3d ': 5, 'rsi_5d ': 5, 'rsi_10d ': 5, 'rsi_20d ': 5, 'rsi_40d ': 5, 'industry_pctChg ': 5, 'rise_ratio ': 5, 'industry_open_ratio ': 5, 'industry_close_ratio ': 5, 'industry_high_ratio ': 5, 'industry_low_ratio ': 5, 'industry_open_ratio_7d_avg ': 5, 'industry_close_ratio_7d_avg ': 5, 'industry_high_ratio_7d_avg ': 5, 'industry_low_ratio_7d_avg ': 5, 'industry_rsv_5 ': 5, 'industry_k_value_5 ': 5, 'industry_d_value_5 ': 5, 'industry_j_value_5 ': 5, 'industry_k_value_trend_5 ': 5, 'industry_rsv_9 ': 5, 'industry_k_value_9 ': 5, 'industry_d_value_9 ': 5, 'industry_j_value_9 ': 5, 'industry_k_value_trend_9 ': 5, 'industry_rsv_19 ': 5, 'industry_k_value_19 ': 5, 'industry_d_value_19 ': 5, 'industry_j_value_19 ': 5, 'industry_k_value_trend_19 ': 5, 'industry_rsv_73 ': 5, 'industry_k_value_73 ': 5, 'industry_d_value_73 ': 5, 'industry_j_value_73 ': 5, 'industry_k_value_trend_73 ': 5, 'industry_macd_dif_ratio ': 5, 'industry_macd_positive_ratio_2 ': 5, 'industry_macd_positive_ratio_3 ': 5, 'industry_macd_positive_ratio_5 ': 5, 'industry_macd_positive_ratio_10 ': 5, 'industry_macd_positive_ratio_20 ': 5, 'industry_macd_positive_ratio_40 ': 5, 'industry_width_20 ': 5, 'industry_close_mb20_diff ': 5, 'industry_rsi_3d ': 5, 'industry_rsi_5d ': 5, 'industry_rsi_10d ': 5, 'industry_rsi_20d ': 5, 'industry_rsi_40d ': 5, 'all_pctChg ': 5, 'all_turn ': 5, 'all_rise_ratio ': 5, 'all_pctChg_3 ': 5, 'all_turn_3 ': 5, 'all_rise_ratio_3 ': 5, 'all_pctChg_5 ': 5, 'all_turn_5 ': 5, 'all_rise_ratio_5 ': 5, 'all_pctChg_10 ': 5, 'all_turn_10 ': 5, 'all_rise_ratio_10 ': 5, 'zs_open_ratio ': 5, 'zs_close_ratio ': 5, 'zs_high_ratio ': 5, 'zs_low_ratio ': 5, 'zs_pctChg ': 5, 'zs_open_ratio_7d_avg ': 5, 'zs_close_ratio_7d_avg ': 5, 'zs_high_ratio_7d_avg ': 5, 'zs_low_ratio_7d_avg ': 5, 'zs_rsv_5 ': 5, 'zs_k_value_5 ': 5, 'zs_d_value_5 ': 5, 'zs_j_value_5 ': 5, 'zs_k_value_trend_5 ': 5, 'zs_rsv_9 ': 5, 'zs_k_value_9 ': 5, 'zs_d_value_9 ': 5, 'zs_j_value_9 ': 5, 'zs_k_value_trend_9 ': 5, 'zs_rsv_19 ': 5, 'zs_k_value_19 ': 5, 'zs_d_value_19 ': 5, 'zs_j_value_19 ': 5, 'zs_k_value_trend_19 ': 5, 'zs_rsv_73 ': 5, 'zs_k_value_73 ': 5, 'zs_d_value_73 ': 5, 'zs_j_value_73 ': 5, 'zs_k_value_trend_73 ': 5, 'zs_macd_dif_ratio ': 5, 'zs_macd_positive_ratio_2 ': 5, 'zs_macd_positive_ratio_3 ': 5, 'zs_macd_positive_ratio_5 ': 5, 'zs_macd_positive_ratio_10 ': 5, 'zs_macd_positive_ratio_20 ': 5, 'zs_macd_positive_ratio_40 ': 5, 'zs_width_20 ': 5, 'zs_close_mb20_diff ': 5, 'zs_rsi_3d ': 5, 'zs_rsi_5d ': 5, 'zs_rsi_10d ': 5, 'zs_rsi_20d ': 5, 'zs_rsi_40d ': 5, 'label_7 ': 5, 'label_7_real ': 5, 'label_7_weight ': 5, 'label_7_max ': 5, 'label_7_max_real ': 5, 'label_7_max_weight ': 5, 'label_15 ': 5, 'label_15_real ': 5, 'label_15_weight ': 5, 'label_15_max ': 5, 'label_15_max_real ': 5, 'label_15_max_weight ': 5})
 
 		return feature_all
 if __name__ == '__main__':
-	years = [2016, 2017, 2018, 2019, 2020, 2021, 2022]
-	# years = [2008]
+	# years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022]
+	years = [2022]
 	for year in years:
 		path = 'E:/pythonProject/future/data/datafile/raw_feature/code_k_data_v4_'
 		quater_path = 'E:/pythonProject/future/data/datafile/code_quarter_data_v2_all.csv'
+		output_path = 'E:/pythonProject/future/data/datafile/feature/{year}_feature_v5.csv'.format(year=str(year))
 		feature = Feature(path, year, quater_path)
+		if os.path.isfile(output_path):
+			os.remove(output_path)
 		feature_all = feature.feature_process()
 		# print(feature_all)
-		feature_all.to_csv('E:/pythonProject/future/data/datafile/feature/{year}_feature_v4.csv'.format(year=str(year)),
-		                 mode='w', header=True, index=False)
-
+		feature_all.to_csv(output_path, mode='w', header=True, index=False)

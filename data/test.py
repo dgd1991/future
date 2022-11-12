@@ -1,49 +1,86 @@
+import math
+
+import numpy as np
 import pandas as pd
-year = 2020
-model_name = 'model_v4'
-# test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
-# df = pd.read_csv(test_data)
-# # df = df[df['date']==20200126]
-# test_data1 = 'E:/pythonProject/future/data/datafile/prediction_result/{model_name}/prediction_result_{year}.csv'.format(model_name=model_name,year=str(year))
-# df1 = pd.read_csv(test_data1)
-# df1.columns = ['date', 'code', 'predition', 'label_7', 'label_7_real', 'label_7_weight', 'label_7_max', 'label_7_max_real', 'label_7_max_weight', 'label_15', 'label_15_real', 'label_15_weight', 'label_15_max', 'label_15_max_real', 'label_15_max_weight']
-# # df1 = df1[df1['date']==20200126]
-# # print(df.shape)
-# # print(df1.shape)
-# df = df.groupby('date')['code'].count()
-# df1 = df1.groupby('date')['code'].count()
-# print(df)
-# print(df1)
-import os
-test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name='tmp', year=str(2021))
-if os.path.isfile(test_data):
-	os.remove(test_data)
-df = pd.read_csv(test_data)
-df = df[df['date']==20200120]
-print(df.shape)
-# df.to_csv('E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}_test.csv'.format(model_name=model_name,year=str(year)), mode='a', header=True, index=False, encoding='utf-8')
+# import tushare as ts
+# pro=ts.pro_api('310e0e16357bb6357a57010274423a4393e67eb41ea3600db2b00391')
+#
+# his = pro.get_industry_classified(standard='sw')
+
+# industry_raw_2014_path = 'E:/pythonProject/future/data/datafile/raw_feature/sw_industry_2014_raw.csv'
+# industry_raw_2014 = pd.read_csv(industry_raw_2014_path, encoding='utf-8')
+# industry_raw_2014.columns = ['industry_name_level1', 'industry_name_level2', 'industry_name_level3','industry_code']
+# industry_raw_2014 = industry_raw_2014.dropna(axis=0, how='all', thresh=None, subset=None, inplace=False)
+# industry_dic = {}
+# for tup in industry_raw_2014.itertuples():
+# 	# print(type(tup[1]))
+# 	if type(tup[1]) == str:
+# 		if industry_dic.__contains__(math.floor(tup[4]/1000)):
+# 			print(industry_dic[math.floor(tup[4]/1000)])
+# 			print(tup[1])
+# 			print(tup[4])
+# 			print(math.floor(tup[4]/1000))
+# 		else:
+# 			industry_dic[math.floor(tup[4] / 1000)] = tup[1]
+# 	if type(tup[2]) == str:
+# 		if industry_dic.__contains__(math.floor(tup[4]/100)):
+# 			print(industry_dic[math.floor(tup[4]/100)])
+# 			print(tup[1])
+# 			print(tup[4])
+# 			print(math.floor(tup[4]/100))
+# 		else:
+# 			industry_dic[math.floor(tup[4] / 100)] = tup[2]
+# industry_raw_2014 = industry_raw_2014[~(industry_raw_2014['industry_name_level3'].isna())]
+# industry_raw_2014['industry_name_level1'] = industry_raw_2014['industry_code'].map(lambda x: industry_dic[math.floor(x / 1000)])
+# industry_raw_2014['industry_name_level2'] = industry_raw_2014['industry_code'].map(lambda x: industry_dic[math.floor(x / 100)])
+# industry_raw_2014.to_csv('E:/pythonProject/future/data/datafile/raw_feature/sw_industry_all_2014.csv', mode='a', header=True, index=False)
+
+# industry_raw_2014_path = 'E:/pythonProject/future/data/datafile/raw_feature/sw_industry_all_2014.csv'
+# industry_raw_2014 = pd.read_csv(industry_raw_2014_path, encoding='utf-8')
+# industry_raw_2014['industry_code'] = industry_raw_2014['industry_code'].map(lambda x: int(x))
+# industry_raw_2014['year'] = 2014
+# industry_raw_2021_path = 'E:/pythonProject/future/data/datafile/raw_feature/sw_industry_all_2021.csv'
+# industry_raw_2021 = pd.read_csv(industry_raw_2021_path, encoding='utf-8')
+# industry_raw_2021.columns = ['industry_code','industry_name_level1', 'industry_name_level2', 'industry_name_level3']
+# industry_raw_2021 = industry_raw_2021[~(industry_raw_2021['industry_name_level3'].isna())]
+# industry_raw_2021_final = industry_raw_2021[['industry_name_level1', 'industry_name_level2', 'industry_name_level3']]
+# industry_raw_2021_final['industry_code'] = industry_raw_2021['industry_code']
+# industry_raw_2021_final['year'] = 2021
+# industry_raw_all = pd.concat([industry_raw_2014, industry_raw_2021_final], axis=0)
+# industry_raw_all['row_num'] = industry_raw_all.groupby('industry_code')['year'].rank(ascending=False,method='first').astype(int)
+# industry_raw_all = industry_raw_all.sort_values(by = ['industry_code','year'])
+# print(industry_raw_all)
+# industry_raw_all = industry_raw_all[industry_raw_all['row_num'] == 1]
+# industry_raw_all_final = industry_raw_all[['industry_code','industry_name_level1', 'industry_name_level2', 'industry_name_level3']]
+# industry_raw_all_final.to_csv('E:/pythonProject/future/data/datafile/raw_feature/sw_industry_all.csv', mode='a', header=True, index=False)
 
 
-raw_k_data["tradestatus"] = pd.to_numeric(raw_k_data["tradestatus"], errors='coerce')
-raw_k_data["turn"] = pd.to_numeric(raw_k_data["turn"], errors='coerce')
-raw_k_data["pctChg"] = pd.to_numeric(raw_k_data["pctChg"], errors='coerce')
-raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] <= 20) & (raw_k_data['pctChg'] >= -20)]
-raw_k_data["open"] = pd.to_numeric(raw_k_data["open"], errors='coerce')
-raw_k_data["close"] = pd.to_numeric(raw_k_data["close"], errors='coerce')
-raw_k_data["pctChg"] = pd.to_numeric(raw_k_data["pctChg"], errors='coerce')
-raw_k_data["preclose"] = pd.to_numeric(raw_k_data["preclose"], errors='coerce')
-raw_k_data["high"] = pd.to_numeric(raw_k_data["high"], errors='coerce')
-raw_k_data["low"] = pd.to_numeric(raw_k_data["low"], errors='coerce')
-raw_k_data['date'] = pd.to_datetime(raw_k_data['date'])
-raw_k_data['open_ratio'] = ((raw_k_data['open'] - raw_k_data['preclose']) / raw_k_data['preclose'])
-raw_k_data['close_ratio'] = ((raw_k_data['close'] - raw_k_data['open']) / raw_k_data['open'])
-raw_k_data['high_ratio'] = ((raw_k_data['high'] - raw_k_data['preclose']) / raw_k_data['preclose'])
-raw_k_data['low_ratio'] = ((raw_k_data['low'] - raw_k_data['preclose']) / raw_k_data['preclose'])
-raw_k_data['amount'] = raw_k_data['amount']
-raw_k_data['pctChg'] = raw_k_data['pctChg']
-raw_k_data['peTTM'] = raw_k_data['peTTM']
-raw_k_data['pcfNcfTTM'] = raw_k_data['pcfNcfTTM']
-raw_k_data['pbMRQ'] = raw_k_data['pbMRQ']
-raw_k_data['isST'] = raw_k_data['isST']
+code_industry_path = 'E:/pythonProject/future/data/datafile/raw_feature/sw_code_industry.csv'
+code_industry = pd.read_csv(code_industry_path, encoding='utf-8', converters={u'股票代码':str})
+print(code_industry)
+code_industry.columns = ['code', 'start_date', 'industry_code', 'update']
+industry_all_path = 'E:/pythonProject/future/data/datafile/raw_feature/sw_industry_all.csv'
+industry_all = pd.read_csv(industry_all_path, encoding='utf-8')
+code_industry_all = pd.merge(code_industry, industry_all, how="inner", left_on=['industry_code'], right_on=['industry_code'])
+# print(code_industry_all)
+code_industry_all = code_industry_all.sort_values(by = ['code'])
+
+from tools.Tools import Tools
+tools = Tools()
+tools.dictionary_load_path = 'E:/pythonProject/future/dictionary/sw_industry_dic.npy'
+dictionary = tools.dictionary_load()
+dictionary_level1 = dictionary[tools.industry_level1]
+dictionary_level2 = dictionary[tools.industry_level2]
+dictionary_level3 = dictionary[tools.industry_level3]
+code_industry_all['industry_id_level1'] = code_industry_all['industry_name_level1'].map(lambda x: dictionary_level1[x])
+code_industry_all['industry_id_level2'] = code_industry_all['industry_name_level2'].map(lambda x: dictionary_level2[x])
+code_industry_all['industry_id_level3'] = code_industry_all['industry_name_level3'].map(lambda x: dictionary_level3[x])
+
+code_industry_all['code'] = code_industry_all['code'].map(lambda x: tools.sw_code_to_bs_code(str(x)))
+code_industry_all['start_date'] = code_industry_all['start_date'].map(lambda x: tools.sw_date_to_bs_date(x))
+
+code_industry_all.to_csv('E:/pythonProject/future/data/datafile/raw_feature/sw_code_all_industry.csv', mode='a', header=True, index=False)
+
+
 
 
