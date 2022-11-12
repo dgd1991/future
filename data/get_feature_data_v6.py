@@ -174,6 +174,7 @@ class Feature(object):
 		raw_k_data = pd.read_csv(self.k_file_path)
 		raw_k_data_his = pd.read_csv(self.k_file_path_his)
 		raw_k_data = pd.concat([raw_k_data_his, raw_k_data], axis=0)
+		raw_k_data = raw_k_data[raw_k_data['industry_id_level3']>0]
 		del raw_k_data_his
 		gc.collect()
 		raw_k_data["tradestatus"] = pd.to_numeric(raw_k_data["tradestatus"], errors='coerce')
@@ -346,6 +347,7 @@ class Feature(object):
 		raw_k_data = pd.read_csv(self.k_file_path)
 		raw_k_data_his = pd.read_csv(self.k_file_path_his)
 		raw_k_data = pd.concat([raw_k_data_his, raw_k_data], axis=0)
+		raw_k_data = raw_k_data[raw_k_data['industry_id_level3'] > 0]
 		del raw_k_data_his
 		gc.collect()
 		raw_k_data["tradestatus"] = pd.to_numeric(raw_k_data["tradestatus"], errors='coerce')
@@ -518,6 +520,7 @@ class Feature(object):
 		raw_k_data = pd.read_csv(self.k_file_path)
 		raw_k_data_his = pd.read_csv(self.k_file_path_his)
 		raw_k_data = pd.concat([raw_k_data_his, raw_k_data], axis=0)
+		raw_k_data = raw_k_data[raw_k_data['industry_id_level3'] > 0]
 		del raw_k_data_his
 		gc.collect()
 		raw_k_data["tradestatus"] = pd.to_numeric(raw_k_data["tradestatus"], errors='coerce')
@@ -744,7 +747,7 @@ class Feature(object):
 
 		return feature_all
 if __name__ == '__main__':
-	years = [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022]
+	years = [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022]
 	# years = [2008]
 	for year in years:
 		path = 'E:/pythonProject/future/data/datafile/raw_feature/code_k_data_v5_'

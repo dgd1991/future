@@ -64,7 +64,7 @@ class Sample(object):
 		sample.to_csv('{output_dir}/sample/{model_name}/train_sample_{year}.csv'.format(output_dir=self.output_dir, model_name=self.model_name, year=str(self.year)), mode='a',header=True, index=False, encoding='utf-8')
 if __name__ == '__main__':
 	base_path = 'E:/pythonProject/future/data/datafile'
-	model_name = 'model_v6'
+	model_name = 'model_v5'
 	# years = [2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022]
 	years = [2022]
 	for year in years:
