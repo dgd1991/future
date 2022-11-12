@@ -60,7 +60,7 @@ class Sample(object):
 
 if __name__ == '__main__':
 	base_path = 'E:/pythonProject/future/data/datafile'
-	model_name = 'model_v4'
+	model_name = 'model_v5'
 	years = [2021,2022]
 	for year in years:
 		sample = Sample(year, base_path, model_name)

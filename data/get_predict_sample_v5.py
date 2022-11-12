@@ -47,7 +47,7 @@ class Sample(object):
 		sample.to_csv('{output_dir}/prediction_sample/{model_name}/prediction_sample_{date}.csv'.format(output_dir=self.output_dir, model_name=self.model_name, date=str(self.date)), mode='a',header=True, index=False, encoding='utf-8')
 if __name__ == '__main__':
 	base_path = 'E:/pythonProject/future/data/datafile'
-	model_name = 'model_v5'
+	model_name = 'model_v6'
 	year = 2022
 	date = 20221110
 	sample = Sample(year, date, base_path, model_name)

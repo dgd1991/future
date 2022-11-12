@@ -390,10 +390,10 @@ if __name__ == "__main__":
     # 2008, 2009, 2010,2011,
     years = [2014, 2015, 2016, 2017, 2018, 2019]
     for year in years:
-        model = DeepFM(year, 'train', 'model_v4')
+        model = DeepFM(year, 'train', 'model_v5')
         model.run()
 
         # model = DeepFM(year, 'predict', 'model_v3')
         # model.run()
-    # model = DeepFM(2013, 'train', 'model_v4')
+    # model = DeepFM(2013, 'train', 'model_v5')
     # model.run()

@@ -355,8 +355,8 @@ class DeepFM(object):
 
 #
 def main():
-    model = DeepFM(2010, 'predict', 'model_v4')
-    test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}_test.csv'.format(model_name='model_v4', year=str(2010))
+    model = DeepFM(2010, 'predict', 'model_v5')
+    test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}_test.csv'.format(model_name='model_v5', year=str(2010))
     features_batch, label_batch = model.test_input_fn_from_csv(data_path=test_data, epoch=1, batch_size=1)
 
     # dataset = model.test_input_fn_from_csv(data_path=test_data, epoch=1, batch_size=2)
@@ -396,8 +396,8 @@ if __name__ == "__main__":
 
     years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019]
     for year in years:
-        model = DeepFM(year, 'train', 'model_v4', 'saved_model_v5')
+        model = DeepFM(year, 'train', 'model_v5', 'saved_model_v5')
         model.run()
 
-        model = DeepFM(year, 'predict', 'model_v4', 'saved_model_v5')
+        model = DeepFM(year, 'predict', 'model_v5', 'saved_model_v5')
         model.run()
