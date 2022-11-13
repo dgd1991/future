@@ -13,14 +13,14 @@ from tensorflow.python.training import queue_runner_impl
 from tensorflow.core.util.event_pb2 import SessionLog
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 class DeepFM(object):
-    def __init__(self, year, train_stype, model_name, saved_model):
+    def __init__(self, year, date, train_stype, model_name, saved_model):
         # for index in range(10):
         #     self.train_data.append('E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(
         #         model_name=model_name, year=str(index + 2008)))
 
         self.train_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
-        self.test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year+1))
-        self.prediction_result = 'E:/pythonProject/future/data/datafile/prediction_result/{model_name}/prediction_result_{year}.csv'.format(model_name=saved_model, year=str(year+1))
+        self.test_data = 'E:/pythonProject/future/data/datafile/prediction_sample/{model_name}/prediction_sample_{date}.csv'.format(model_name=model_name, date=str(date))
+        self.prediction_result = 'E:/pythonProject/future/data/datafile/prediction_result/{model_name}/prediction_result_{date}.csv'.format(model_name=saved_model, date=str(date))
         self.task_type = train_stype
         self.checkpoint_path = "E:\\pythonProject\\future\\saved_model\\{model_name}".format(model_name=str(saved_model))
         self.save_summary_steps = 100000
@@ -402,37 +402,12 @@ def main():
         print('end')
 
 if __name__ == "__main__":
-    # rm -r E:/pythonProject/future/saved_model/*
-    # main()
-    # tf.test.is_gpu_available()
-    # years = [2011, 2012, 2013, 2014]
-    # for year in years:
-    #     model = DeepFM(year, 'train', 'model_v2')
-    #     model.run()
-
-
-    # years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019]
-    years = [2008]
+    year = 2022
+    date = 20221110
     model_name = 'model_v6'
     saved_model_name = 'saved_model_v6'
-    epoch = 1
-    for year in years:
-        for epo in range(epoch):
-            train_data_path_raw = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
-            train_data_path = 'E:/pythonProject/future/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
-            train_data_raw = pd.read_csv(train_data_path_raw).sample(frac=1)
-            if os.path.isfile(train_data_path):
-                os.remove(train_data_path)
-            train_data_raw.to_csv(train_data_path, mode='a', header=True, index=False, encoding='utf-8')
-            model = DeepFM(year, 'train', model_name, saved_model_name)
-            model.lr = 0.0001
-            model.run()
 
-            # model.task_type = 'predict'
-            # if os.path.isfile(model.prediction_result):
-            #     os.remove(model.prediction_result)
-            # model.run()
-        # model = DeepFM(year, 'predict', model_name, saved_model_name)
-        # if os.path.isfile(model.prediction_result):
-        #     os.remove(model.prediction_result)
-        # model.run()
+    model = DeepFM(year, date, 'predict', model_name, saved_model_name)
+    if os.path.isfile(model.prediction_result):
+        os.remove(model.prediction_result)
+    model.run()

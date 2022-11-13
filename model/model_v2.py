@@ -411,7 +411,7 @@ if __name__ == "__main__":
     #     model.run()
 
 
-    years = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021]
+    years = [2008,2009,2010,2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021]
     # years = [2009]
     model_name = 'model_v6'
     saved_model_name = 'saved_model_v6'
@@ -420,18 +420,21 @@ if __name__ == "__main__":
         for epo in range(epoch):
             train_data_path_raw = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
             train_data_path = 'E:/pythonProject/future/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
-            train_data_raw = pd.read_csv(train_data_path_raw).sample(frac=1)
-            if os.path.isfile(train_data_path):
-                os.remove(train_data_path)
-            train_data_raw.to_csv(train_data_path, mode='a', header=True, index=False, encoding='utf-8')
+            if not os.path.isfile(train_data_path):
+                train_data_raw = pd.read_csv(train_data_path_raw).sample(frac=1)
+                if os.path.isfile(train_data_path):
+                    os.remove(train_data_path)
+                train_data_raw.to_csv(train_data_path, mode='a', header=True, index=False, encoding='utf-8')
+                del train_data_raw
+                gc.collect()
             model = DeepFM(year, 'train', model_name, saved_model_name)
             model.lr = 0.0001
             model.run()
 
-            # model.task_type = 'predict'
-            # if os.path.isfile(model.prediction_result):
-            #     os.remove(model.prediction_result)
-            # model.run()
+            model.task_type = 'predict'
+            if os.path.isfile(model.prediction_result):
+                os.remove(model.prediction_result)
+            model.run()
         # model = DeepFM(year, 'predict', model_name, saved_model_name)
         # if os.path.isfile(model.prediction_result):
         #     os.remove(model.prediction_result)
