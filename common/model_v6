@@ -162,7 +162,7 @@ turn_240dmin_dif | float2bucket | 0 | 1 | 500 | 5
 turn_120_240d_avg | float2bucket | 0 | 1 | 200 | 5
 close_240davg_dif | float2bucket | 0 | 1 | 500 | 5
 close_240dmax_dif | float2bucket | 0 | 1 | 100 | 5
-close_240dmin_dif | float2bucket | 0 | 1 | 500 | 5
+close_240d   min_dif | float2bucket | 0 | 1 | 500 | 5
 close_240d_dif | float2bucket | 0 | 1 | 500 | 5
 close_120_240d_avg | float2bucket | 0 | 1 | 200 | 5
 industry_id_level1_open | float2bucket | 0 | 0 | 200 | 5
