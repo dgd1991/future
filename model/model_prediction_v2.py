@@ -403,7 +403,7 @@ def main():
 
 if __name__ == "__main__":
     year = 2022
-    date = 20221110
+    date = 20221115
     model_name = 'model_v6'
     saved_model_name = 'saved_model_v6'
 

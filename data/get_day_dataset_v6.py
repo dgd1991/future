@@ -68,7 +68,6 @@ class Downloader(object):
         self.output_dir = output_dir
         self.data_version = 'v5'
         self.his_data_version = 'v4'
-        self.code_k_data_file_name = 'code_k_data_v4_' + self.date_start.split('-')[0]
         self.code_quarter_data_file_name = 'code_quarter_data_v2_2007'
         self.fields = "date,code,open,high,low,close,preclose,volume,amount,adjustflag,turn,tradestatus,pctChg,peTTM,pbMRQ,psTTM,pcfNcfTTM,isST"
         self.stock_df = self.get_codes_by_date(date_end)
@@ -174,7 +173,7 @@ def main():
     # pw2.daemon = True
     pw1.start()
     # pw2.start()
-    for year in ['2022-11-11']:
+    for year in ['2022-11-16']:
         q.put(year)
     try:
         q.join()

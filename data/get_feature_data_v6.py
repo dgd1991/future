@@ -17,12 +17,14 @@ pd.set_option('display.width', 230)
 
 
 class Feature(object):
-	def __init__(self,  k_file_path, year, quarter_file_path):
+	def __init__(self,  k_file_path, year, quarter_file_path, is_predict, date):
 		self.k_file_path = k_file_path + str(year) + '.csv'
 		self.k_file_path_his = k_file_path + str(year - 1) + '.csv'
 		self.quarter_file_path = quarter_file_path
 		self.year = year
 		self.tools = Tools()
+		self.is_predict = is_predict
+		self.date = date
 
 	def feature_process(self):
 		raw_k_data = pd.read_csv(self.k_file_path)
@@ -171,6 +173,8 @@ class Feature(object):
 		feature_all = feature_all.reset_index(level=0, drop=False)
 		feature_all = feature_all.sort_values(['date', 'code'])
 		feature_all = feature_all[feature_all['date'] > str(self.year)]
+		if is_predict:
+			feature_all = feature_all[feature_all['date'] == self.date]
 
 		# 一级行业特征
 		raw_k_data = pd.read_csv(self.k_file_path)
@@ -749,15 +753,18 @@ class Feature(object):
 
 		return feature_all
 if __name__ == '__main__':
-	years = [2021, 2022]
+	years = [2022]
+	is_predict = True
+	date = '2022-11-16'
 	# years = [2008]
-	time.sleep(18000)
+	# time.sleep(18000)
 	for year in years:
 		path = 'E:/pythonProject/future/data/datafile/raw_feature/code_k_data_v5_'
 		quater_path = 'E:/pythonProject/future/data/datafile/code_quarter_data_v2_all.csv'
 		output_path = 'E:/pythonProject/future/data/datafile/feature/{year}_feature_v6.csv'.format(year=str(year))
-		feature = Feature(path, year, quater_path)
-		if os.path.isfile(output_path):
-			os.remove(output_path)
+		feature = Feature(path, year, quater_path, is_predict, date)
 		feature_all = feature.feature_process()
-		feature_all.to_csv(output_path, mode='w', header=True, index=False)
+		if os.path.isfile(output_path):
+			feature_all.to_csv(output_path, mode='a', header=False, index=False)
+		else:
+			feature_all.to_csv(output_path, mode='a', header=True, index=False)

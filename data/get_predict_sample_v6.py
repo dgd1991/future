@@ -21,11 +21,11 @@ class Sample(object):
 		self.output_dir = base_path
 		self.model_name = model_name
 	def get_sample(self):
-		feature = pd.read_csv(self.fea_path)
-		feature['date'] = feature['date'].map(lambda x: int(x.replace('-', '')))
+		sample = pd.read_csv(self.fea_path)
+		sample['date'] = sample['date'].map(lambda x: int(x.replace('-', '')))
 		# if self.year == 2008:
 		# 	feature['date'] = pd.to_datetime(feature["date"], errors='coerce')
-		sample = feature
+		# sample = feature
 		sample = sample[sample['date'] == self.date]
 		sample = sample[sample['code_market'] != 0]
 		sample['label_7'] = 0
@@ -41,14 +41,12 @@ class Sample(object):
 		sample['label_15_max_real'] = 0
 		sample['label_15_max_weight'] = 0
 
-		del feature
-		gc.collect()
 		sample = sample.sort_values(by=['date', 'code'], ascending=True)
 		sample.to_csv('{output_dir}/prediction_sample/{model_name}/prediction_sample_{date}.csv'.format(output_dir=self.output_dir, model_name=self.model_name, date=str(self.date)), mode='a',header=True, index=False, encoding='utf-8')
 if __name__ == '__main__':
 	base_path = 'E:/pythonProject/future/data/datafile'
 	model_name = 'model_v6'
 	year = 2022
-	date = 20221111
+	date = 20221115
 	sample = Sample(year, date, base_path, model_name)
 	sample.get_sample()
