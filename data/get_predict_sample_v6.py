@@ -47,6 +47,6 @@ if __name__ == '__main__':
 	base_path = 'E:/pythonProject/future/data/datafile'
 	model_name = 'model_v6'
 	year = 2022
-	date = 20221115
+	date = 20221116
 	sample = Sample(year, date, base_path, model_name)
 	sample.get_sample()
