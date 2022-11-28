@@ -75,7 +75,7 @@ class Feature(object):
 		# 市净率一般在3 - 10之间是一个比较合理的范围
 		feature_all['pbMRQ'] = raw_k_data['pbMRQ'].map(lambda x: float2Bucket(float(x), 2, 0, 100, 200))
 		feature_all['isST'] = raw_k_data['isST'].map(lambda x: float2Bucket(float(x), 1, 0, 3, 3))
-		feature_all['turn'] = raw_k_data['turn'].map(lambda x: float2Bucket(float(x), 1, 0, 200, 200))
+		feature_all['turn'] = raw_k_data['turn'].map(lambda x: float2Bucket(float(x), 1, 0, 50, 50))
 
 		# kdj 5, 9, 19, 36, 45, 73，
 		# 任意初始化，超过30天后的kdj值基本一样
