@@ -80,13 +80,14 @@ class Feature(object):
 		# kdj 5, 9, 19, 36, 45, 73，
 		# 任意初始化，超过30天后的kdj值基本一样
 		tmp = raw_k_data[['low', 'high', 'close']]
-		for day_cnt in [5, 9, 19, 73]:
+		for day_cnt in [3, 5, 9, 19, 73]:
 			tmp['min'] = tmp['low'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=day_cnt, center=False).min())
 			tmp['max'] = tmp['high'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=day_cnt, center=False).max())
 			feature_all['rsv_' + str(day_cnt)] = (tmp['close'] - tmp['min'])/(tmp['max'] - tmp['min'])
 			feature_all['k_value_' + str(day_cnt)] = feature_all['rsv_' + str(day_cnt)].groupby(level=0).apply(lambda x: x.ewm(alpha=1.0/3, adjust=False).mean())
 			feature_all['d_value_' + str(day_cnt)] = feature_all['k_value_' + str(day_cnt)].groupby(level=0).apply(lambda x: x.ewm(alpha=1.0/3, adjust=False).mean())
 			feature_all['j_value_' + str(day_cnt)] = 3 * feature_all['k_value_' + str(day_cnt)] - 2 * feature_all['d_value_' + str(day_cnt)]
+			# k_value_trend效果不理想
 			feature_all['k_value_trend_' + str(day_cnt)] = feature_all['k_value_' + str(day_cnt)].groupby(level=0).apply(lambda x: x.rolling(min_periods=2, window=2, center=False).apply(lambda y: (y[1])-y[0]))
 			feature_all['kd_value' + str(day_cnt)] = (feature_all['k_value_' + str(day_cnt)] - feature_all['d_value_' + str(day_cnt)]).rolling(min_periods=2, window=2, center=False).apply(lambda x: 2 if x[1]>0 and x[0]<0 else (0 if x[1]<0 and x[0]>0 else 1))
 
