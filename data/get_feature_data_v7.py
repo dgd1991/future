@@ -48,8 +48,9 @@ class Feature(object):
 		raw_k_data['close_ratio'] = ((raw_k_data['close'] - raw_k_data['open']) / raw_k_data['open'])
 		raw_k_data['high_ratio'] = ((raw_k_data['high'] - raw_k_data['preclose']) / raw_k_data['preclose'])
 		raw_k_data['low_ratio'] = ((raw_k_data['low'] - raw_k_data['preclose']) / raw_k_data['preclose'])
-		raw_k_data['amount'] = raw_k_data['amount']
 		raw_k_data['pctChg'] = raw_k_data['pctChg'].map(lambda x: x/100.0)
+		# 0.00000001 转化成亿
+		raw_k_data['market_value'] = 0.00000001 * raw_k_data['amount']/raw_k_data['pctChg']
 		raw_k_data['code_market'] = raw_k_data['code'].map(lambda x: self.tools.code_market(x))
 
 		raw_k_data['peTTM'] = raw_k_data['peTTM']
@@ -65,12 +66,15 @@ class Feature(object):
 		feature_all['high_ratio_7d_avg'] = raw_k_data.groupby(level=0)['high_ratio'].apply(lambda x: x.rolling(min_periods=1, window=7, center=False).mean())
 		feature_all['low_ratio_7d_avg'] = raw_k_data.groupby(level=0)['low_ratio'].apply(lambda x: x.rolling(min_periods=1, window=7, center=False).mean())
 
-		feature_all['amount'] = raw_k_data['amount'].map(lambda x: None if x == '' else float2Bucket(float(x) * 0.00000001, 1, 0, 10000, 10000))
-		feature_all['peTTM'] = raw_k_data['peTTM'].map(lambda x: float2Bucket(float(x) + 500, 1, 0, 1500, 1500))
-		feature_all['pcfNcfTTM'] = raw_k_data['pcfNcfTTM'].map(lambda x: float2Bucket(float(x) + 500, 1, 0, 2000, 2000))
-		feature_all['pbMRQ'] = raw_k_data['pbMRQ'].map(lambda x: float2Bucket(float(x) + 500, 1, 0, 2000, 2000))
+		# feature_all['amount'] = raw_k_data['amount'].map(lambda x: None if x == '' else bignumber2Bucket(float(x) * 0.0000001, 1, 0))
+		feature_all['market_value'] = raw_k_data['market_value'].map(lambda x: None if x == '' else bignumber2Bucket(float(x), 1.25, 60))
+		# 一般市盈率10-30倍为好
+		feature_all['peTTM'] = raw_k_data['peTTM'].map(lambda x: float2Bucket(float(x) + 200, 0.5, 0, 400, 200))
+		# 市现率合适的范围是0-25之间
+		feature_all['pcfNcfTTM'] = raw_k_data['pcfNcfTTM'].map(lambda x: float2Bucket(float(x) + 200, 0.5, 0, 400, 200))
+		# 市净率一般在3 - 10之间是一个比较合理的范围
+		feature_all['pbMRQ'] = raw_k_data['pbMRQ'].map(lambda x: float2Bucket(float(x), 2, 0, 100, 200))
 		feature_all['isST'] = raw_k_data['isST'].map(lambda x: float2Bucket(float(x), 1, 0, 3, 3))
-
 		feature_all['turn'] = raw_k_data['turn'].map(lambda x: float2Bucket(float(x), 1, 0, 200, 200))
 
 		# kdj 5, 9, 19, 36, 45, 73，
@@ -754,7 +758,7 @@ class Feature(object):
 		return feature_all
 if __name__ == '__main__':
 	years = [2022]
-	is_predict = False
+	is_predict = True
 	date = '2022-11-17'
 	# years = [2008]
 	# time.sleep(18000)

@@ -63,9 +63,10 @@ class Sample(object):
 		sample = sample.sort_values(by=['date', 'code'], ascending=True)
 		sample.to_csv('{output_dir}/sample/{model_name}/train_sample_{year}.csv'.format(output_dir=self.output_dir, model_name=self.model_name, year=str(self.year)), mode='a',header=True, index=False, encoding='utf-8')
 if __name__ == '__main__':
+	time.sleep(3600)
 	base_path = 'E:/pythonProject/future/data/datafile'
 	model_name = 'model_v6'
-	years = [2021,2022]
+	years = [2022]
 	# years = [2009]
 	for year in years:
 		sample = Sample(year, base_path, model_name)

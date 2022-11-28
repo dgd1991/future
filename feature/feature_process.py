@@ -1,7 +1,7 @@
 import math
 def float2Bucket(raw, base, floor, ceil, bucket_Size):
     if not raw or math.isnan(raw):
-        return None
+        return bucket_Size + 3
     else:
         raw = float(raw)
         if raw < floor:
@@ -11,30 +11,39 @@ def float2Bucket(raw, base, floor, ceil, bucket_Size):
         else:
             return int(math.floor(raw * base) % bucket_Size)
 
-
-def bignumber2Bucket(raw, log, bucket_Size, is_abs):
+def bignumber2Bucket(raw, log, bucket_Size):
     if not raw or math.isnan(raw):
-        return None
+        return bucket_Size + 1
     else:
         raw = float(raw)
-        if is_abs:
-            bucket_Size = bucket_Size / 2
-            if raw < 0:
-                raw = abs(raw)
-                if raw < 1:
-                    return bucket_Size * 2 + 1
-                else:
-                    return int(math.log(raw, log) % bucket_Size)
-            else:
-                if raw < 1:
-                    return bucket_Size * 2 + 2
-                else:
-                    return int(math.log(raw, log) % bucket_Size) + bucket_Size
+        if raw < 1:
+            return bucket_Size + 2
         else:
-            if raw < 1:
-                return bucket_Size + 1
-            else:
-                return int(math.log(raw, log) % bucket_Size)
+            return int(math.log(raw, log)) % bucket_Size
+
+# def bignumber2Bucket(raw, log, bucket_Size, is_abs):
+#     if not raw or math.isnan(raw):
+#         return None
+#     else:
+#         raw = float(raw)
+#         if is_abs:
+#             bucket_Size = bucket_Size / 2
+#             if raw < 0:
+#                 raw = abs(raw)
+#                 if raw < 1:
+#                     return bucket_Size * 2 + 1
+#                 else:
+#                     return int(math.log(raw, log) % bucket_Size)
+#             else:
+#                 if raw < 1:
+#                     return bucket_Size * 2 + 2
+#                 else:
+#                     return int(math.log(raw, log) % bucket_Size) + bucket_Size
+#         else:
+#             if raw < 1:
+#                 return bucket_Size + 1
+#             else:
+#                 return int(math.log(raw, log) % bucket_Size)
 
 
 def get_date_quarter(year, month, last_quarter):

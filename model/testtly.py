@@ -1,148 +1,40 @@
-import numpy as np
-import tensorflow as tf
 
-#
-# input_data = np.arange(16)
-#
-#
-# dataset = tf.data.Dataset.from_tensor_slices(
-#     input_data  # numpy数组或者list列表
-# )  # numpy数组转tf.Tensor数组（即：TensorSliceDataset）
-#
-# datasets = dataset.shuffle(buffer_size=10) # 把dataset打乱顺序
-#
-# for data in datasets:
-#     print(data)
-#
-
-
-
-#
-# features = {"tokens":[["4","5","6"],["4","5","6"],["4","5","6"]],"user_id":["4","6","7"],"item_id":["3","6","8"],"map_id":[["4","5","6"],["4","5","6"],["4","5","6"]],"map_w":[[1.0,0.000001,1.0],[1.5,0.01,1.0],[1.5,0.01,1.0]]}
-# all_feas = {"to":[["4","5","6"],["4","5","6"],["4","5","6"]],"user":["4","6","7"],"item":["3","6","8"],"map":[["4","5","6"],["4","5","6"],["4","5","6"]],"map_uu":[[1.0,0.000001,1.0],[1.5,0.01,1.0],[1.5,0.01,1.0]]}
-#
-# dense_tensor = tf.feature_column.input_layer(features,all_feas )
-# with tf.Session() as session:
-# 	session.run(tf.global_variables_initializer())
-# 	print(session.run(dense_tensor))
 # #
-# embed_input = tf.reshape(tf.feature_column.input_layer(features, all_feas), [-1, self.embedding_dim])
-# embed_input = tf.reshape(embed_input, [-1, self.embedding_dim * self.fea_count])
-
-
-# import tensorflow as tf
-# sess=tf.Session()
-# features = {
-#     'department': ['sport', 'sport', 'drawing', 'gardening', 'travelling'],
-# }
-# # 特征列
-# department = tf.feature_column.categorical_column_with_hash_bucket('department', 4, dtype=tf.string)
-# department = tf.feature_column.indicator_column(department)
-#
-# #组合特征列
-# columns = [
-#     department
-# ]
-#
-# #输入层（数据，特征列）
-# inputs = tf.feature_column.input_layer(features, columns)
-#
-# #初始化并运行
-# init = tf.global_variables_initializer()
-# sess.run(tf.tables_initializer())
-# sess.run(init)
-#
-# v=sess.run(inputs)
-# print(v)
-
-#
-# import tensorflow as tf
-# sess=tf.Session()
-#
-# name = 'code'
-# hash_bucket = 5
-# dim = 6
-# cate_feature = tf.feature_column.categorical_column_with_hash_bucket(name,
-#                                                                           hash_bucket,
-#                                                                           dtype=tf.string)
-#
-# emb_col = tf.feature_column.embedding_column(
-#     cate_feature,
-#     dimension=dim,
-#     combiner='mean',initializer=tf.truncated_normal_initializer(stddev=0.1)
-# )
-# indicator_column = tf.feature_column.indicator_column(cate_feature)
-#
-# fea = ['a|b|c', 'C|n']
-# sparse_tensor = tf.string_split(fea, delimiter="|", skip_empty=False)
-# sparse_tensor_1 = tf.sparse_tensor_to_dense(sparse_tensor, default_value="", validate_indices=True)
-# nafe = {'code':[['1','5'],['2','3'],['4','2']]}
-# dense_tensor = tf.feature_column.input_layer(nafe,indicator_column)
-# with tf.Session() as session:
-# 	session.run(tf.global_variables_initializer())
-# 	# print(session.run(dense_tensor))
-# 	print(session.run(dense_tensor))
-# 	print(session.run(tf.reshape(dense_tensor, [-1])))
-
-#
-# key_name= 'name'
-# dim = 4
-# hash_bucket = 4
-# id_feature = tf.feature_column.categorical_column_with_identity(key_name, num_buckets=hash_bucket, default_value=0)
-# emb_col = tf.feature_column.embedding_column(id_feature, dim,
-#                                              initializer=tf.truncated_normal_initializer(stddev=0.1))
-# # ind_col = feature_column.indicator_column(id_feature)
-# import tensorflow as tf
-# sess=tf.Session()
-# list = []
-# nafe = {'name': [1,3,9],'age':['1','3','0']}
-# fea_nzme = ["name", "age"]
-#
-# for fea in fea_nzme:
-#     if fea == 'name':
-#         id_feature = tf.feature_column.categorical_column_with_identity(fea, num_buckets=hash_bucket, default_value=0)
-#         emb_col = tf.feature_column.embedding_column(id_feature, dim,
-#                                                      initializer=tf.truncated_normal_initializer(stddev=0.1))
-#         list.append(emb_col)
-#     elif  fea == 'age':
-#         cate_feature = tf.feature_column.categorical_column_with_hash_bucket(fea,
-#                                                                                   hash_bucket,
-#                                                                                   dtype=tf.string)
-#
-#         emb_col = tf.feature_column.embedding_column(
-#             cate_feature,
-#             dimension=dim,
-#             combiner='mean',initializer=tf.truncated_normal_initializer(stddev=0.1)
-#         )
-#         list.append(emb_col)
-#
-#
-#
-# naf = list
-# dense_tensor  =  tf.feature_column.input_layer(nafe ,naf)
-# with tf.Session() as session:
-#     session.run(tf.global_variables_initializer())
-#     print(session.run(dense_tensor))
-#
+# import pandas as pd
+# year = 2021
+# model_name = 'model_v6'
+# saved_model_name = 'saved_model_v6'
+# train_data_path_raw = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+# train_data_path = 'E:/pythonProject/future/data/datafile/sample/{model_name}/test_shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+# train_data_raw = pd.read_csv(train_data_path_raw).sample(frac=0.001)
+# columns = ['date','code','industry_id_level1','industry_id_level2','industry_id_level3','open_ratio','close_ratio','high_ratio','low_ratio','pctChg','code_market','open_ratio_7d_avg','close_ratio_7d_avg','high_ratio_7d_avg','low_ratio_7d_avg','amount','peTTM','pcfNcfTTM','pbMRQ','isST','turn','rsv_5','k_value_5','d_value_5','j_value_5','k_value_trend_5','kd_value5','rsv_9','k_value_9','d_value_9','j_value_9','k_value_trend_9','kd_value9','rsv_19','k_value_19','d_value_19','j_value_19','k_value_trend_19','kd_value19','rsv_73','k_value_73','d_value_73','j_value_73','k_value_trend_73','kd_value73','macd_positive','macd_dif_ratio','macd_dif_2','macd_dea_2','macd_2','macd_positive_ratio_2','macd_dif_3','macd_dea_3','macd_3','macd_positive_ratio_3','macd_dif_5','macd_dea_5','macd_5','macd_positive_ratio_5','macd_dif_10','macd_dea_10','macd_10','macd_positive_ratio_10','macd_dif_20','macd_dea_20','macd_20','macd_positive_ratio_20','macd_dif_40','macd_dea_40','macd_40','macd_positive_ratio_40','macd_dif_dea','width_20','close_mb20_diff','cr_3d','cr_5d','cr_10d','cr_20d','cr_40d','rsi_3d','rsi_5d','rsi_10d','rsi_20d','rsi_40d','turn_3d_avg','turn_3davg_dif','turn_3dmax_dif','turn_3dmin_dif','close_3davg_dif','close_3dmax_dif','close_3dmin_dif','close_3d_dif','turn_5d_avg','turn_5davg_dif','turn_5dmax_dif','turn_5dmin_dif','turn_3_5d_avg','close_5davg_dif','close_5dmax_dif','close_5dmin_dif','close_5d_dif','close_3_5d_avg','turn_10d_avg','turn_10davg_dif','turn_10dmax_dif','turn_10dmin_dif','turn_5_10d_avg','close_10davg_dif','close_10dmax_dif','close_10dmin_dif','close_10d_dif','close_5_10d_avg','turn_20d_avg','turn_20davg_dif','turn_20dmax_dif','turn_20dmin_dif','turn_10_20d_avg','close_20davg_dif','close_20dmax_dif','close_20dmin_dif','close_20d_dif','close_10_20d_avg','turn_30d_avg','turn_30davg_dif','turn_30dmax_dif','turn_30dmin_dif','turn_20_30d_avg','close_30davg_dif','close_30dmax_dif','close_30dmin_dif','close_30d_dif','close_20_30d_avg','turn_60d_avg','turn_60davg_dif','turn_60dmax_dif','turn_60dmin_dif','turn_30_60d_avg','close_60davg_dif','close_60dmax_dif','close_60dmin_dif','close_60d_dif','close_30_60d_avg','turn_120d_avg','turn_120davg_dif','turn_120dmax_dif','turn_120dmin_dif','turn_60_120d_avg','close_120davg_dif','close_120dmax_dif','close_120dmin_dif','close_120d_dif','close_60_120d_avg','turn_240d_avg','turn_240davg_dif','turn_240dmax_dif','turn_240dmin_dif','turn_120_240d_avg','close_240davg_dif','close_240dmax_dif','close_240dmin_dif','close_240d_dif','close_120_240d_avg','industry_id_level1_open','industry_id_level1_close','industry_id_level1_preclose','industry_id_level1_high','industry_id_level1_low','industry_id_level1_turn','industry_id_level1_amount','industry_id_level1_pctChg','industry_id_level1_peTTM','industry_id_level1_pcfNcfTTM','industry_id_level1_pbMRQ','industry_id_level1_rise_ratio','industry_id_level1_open_ratio','industry_id_level1_close_ratio','industry_id_level1_high_ratio','industry_id_level1_low_ratio','industry_id_level1_open_ratio_7d_avg','industry_id_level1_close_ratio_7d_avg','industry_id_level1_high_ratio_7d_avg','industry_id_level1_low_ratio_7d_avg','industry_id_level1_rsv_5','industry_id_level1_k_value_5','industry_id_level1_d_value_5','industry_id_level1_j_value_5','industry_id_level1_k_value_trend_5','industry_id_level1_kd_value5','industry_id_level1_rsv_9','industry_id_level1_k_value_9','industry_id_level1_d_value_9','industry_id_level1_j_value_9','industry_id_level1_k_value_trend_9','industry_id_level1_kd_value9','industry_id_level1_rsv_19','industry_id_level1_k_value_19','industry_id_level1_d_value_19','industry_id_level1_j_value_19','industry_id_level1_k_value_trend_19','industry_id_level1_kd_value19','industry_id_level1_rsv_73','industry_id_level1_k_value_73','industry_id_level1_d_value_73','industry_id_level1_j_value_73','industry_id_level1_k_value_trend_73','industry_id_level1_kd_value73','industry_id_level1_macd_positive','industry_id_level1_macd_dif_ratio','industry_id_level1_macd_dif_2','industry_id_level1_macd_dea_2','industry_id_level1_macd_2','industry_id_level1_macd_positive_ratio_2','industry_id_level1_macd_dif_3','industry_id_level1_macd_dea_3','industry_id_level1_macd_3','industry_id_level1_macd_positive_ratio_3','industry_id_level1_macd_dif_5','industry_id_level1_macd_dea_5','industry_id_level1_macd_5','industry_id_level1_macd_positive_ratio_5','industry_id_level1_macd_dif_10','industry_id_level1_macd_dea_10','industry_id_level1_macd_10','industry_id_level1_macd_positive_ratio_10','industry_id_level1_macd_dif_20','industry_id_level1_macd_dea_20','industry_id_level1_macd_20','industry_id_level1_macd_positive_ratio_20','industry_id_level1_macd_dif_40','industry_id_level1_macd_dea_40','industry_id_level1_macd_40','industry_id_level1_macd_positive_ratio_40','industry_id_level1_macd_dif_dea','industry_id_level1_width_20','industry_id_level1_close_mb20_diff','industry_id_level1_cr_3d','industry_id_level1_cr_5d','industry_id_level1_cr_10d','industry_id_level1_cr_20d','industry_id_level1_cr_40d','industry_id_level1_rsi_3d','industry_id_level1_rsi_5d','industry_id_level1_rsi_10d','industry_id_level1_rsi_20d','industry_id_level1_rsi_40d','industry_id_level1_turn_3d_avg','industry_id_level1_turn_3davg_dif','industry_id_level1_turn_3dmax_dif','industry_id_level1_turn_3dmin_dif','industry_id_level1_close_3davg_dif','industry_id_level1_close_3dmax_dif','industry_id_level1_close_3dmin_dif','industry_id_level1_close_3d_dif','industry_id_level1_turn_5d_avg','industry_id_level1_turn_5davg_dif','industry_id_level1_turn_5dmax_dif','industry_id_level1_turn_5dmin_dif','industry_id_level1_turn_3_5d_avg','industry_id_level1_close_5davg_dif','industry_id_level1_close_5dmax_dif','industry_id_level1_close_5dmin_dif','industry_id_level1_close_5d_dif','industry_id_level1_close_3_5d_avg','industry_id_level1_turn_10d_avg','industry_id_level1_turn_10davg_dif','industry_id_level1_turn_10dmax_dif','industry_id_level1_turn_10dmin_dif','industry_id_level1_turn_5_10d_avg','industry_id_level1_close_10davg_dif','industry_id_level1_close_10dmax_dif','industry_id_level1_close_10dmin_dif','industry_id_level1_close_10d_dif','industry_id_level1_close_5_10d_avg','industry_id_level1_turn_20d_avg','industry_id_level1_turn_20davg_dif','industry_id_level1_turn_20dmax_dif','industry_id_level1_turn_20dmin_dif','industry_id_level1_turn_10_20d_avg','industry_id_level1_close_20davg_dif','industry_id_level1_close_20dmax_dif','industry_id_level1_close_20dmin_dif','industry_id_level1_close_20d_dif','industry_id_level1_close_10_20d_avg','industry_id_level1_turn_30d_avg','industry_id_level1_turn_30davg_dif','industry_id_level1_turn_30dmax_dif','industry_id_level1_turn_30dmin_dif','industry_id_level1_turn_20_30d_avg','industry_id_level1_close_30davg_dif','industry_id_level1_close_30dmax_dif','industry_id_level1_close_30dmin_dif','industry_id_level1_close_30d_dif','industry_id_level1_close_20_30d_avg','industry_id_level1_turn_60d_avg','industry_id_level1_turn_60davg_dif','industry_id_level1_turn_60dmax_dif','industry_id_level1_turn_60dmin_dif','industry_id_level1_turn_30_60d_avg','industry_id_level1_close_60davg_dif','industry_id_level1_close_60dmax_dif','industry_id_level1_close_60dmin_dif','industry_id_level1_close_60d_dif','industry_id_level1_close_30_60d_avg','industry_id_level1_turn_120d_avg','industry_id_level1_turn_120davg_dif','industry_id_level1_turn_120dmax_dif','industry_id_level1_turn_120dmin_dif','industry_id_level1_turn_60_120d_avg','industry_id_level1_close_120davg_dif','industry_id_level1_close_120dmax_dif','industry_id_level1_close_120dmin_dif','industry_id_level1_close_120d_dif','industry_id_level1_close_60_120d_avg','industry_id_level1_turn_240d_avg','industry_id_level1_turn_240davg_dif','industry_id_level1_turn_240dmax_dif','industry_id_level1_turn_240dmin_dif','industry_id_level1_turn_120_240d_avg','industry_id_level1_close_240davg_dif','industry_id_level1_close_240dmax_dif','industry_id_level1_close_240dmin_dif','industry_id_level1_close_240d_dif','industry_id_level1_close_120_240d_avg','industry_id_level2_open','industry_id_level2_close','industry_id_level2_preclose','industry_id_level2_high','industry_id_level2_low','industry_id_level2_turn','industry_id_level2_amount','industry_id_level2_pctChg','industry_id_level2_peTTM','industry_id_level2_pcfNcfTTM','industry_id_level2_pbMRQ','industry_id_level2_rise_ratio','industry_id_level2_open_ratio','industry_id_level2_close_ratio','industry_id_level2_high_ratio','industry_id_level2_low_ratio','industry_id_level2_open_ratio_7d_avg','industry_id_level2_close_ratio_7d_avg','industry_id_level2_high_ratio_7d_avg','industry_id_level2_low_ratio_7d_avg','industry_id_level2_rsv_5','industry_id_level2_k_value_5','industry_id_level2_d_value_5','industry_id_level2_j_value_5','industry_id_level2_k_value_trend_5','industry_id_level2_kd_value5','industry_id_level2_rsv_9','industry_id_level2_k_value_9','industry_id_level2_d_value_9','industry_id_level2_j_value_9','industry_id_level2_k_value_trend_9','industry_id_level2_kd_value9','industry_id_level2_rsv_19','industry_id_level2_k_value_19','industry_id_level2_d_value_19','industry_id_level2_j_value_19','industry_id_level2_k_value_trend_19','industry_id_level2_kd_value19','industry_id_level2_rsv_73','industry_id_level2_k_value_73','industry_id_level2_d_value_73','industry_id_level2_j_value_73','industry_id_level2_k_value_trend_73','industry_id_level2_kd_value73','industry_id_level2_macd_positive','industry_id_level2_macd_dif_ratio','industry_id_level2_macd_dif_2','industry_id_level2_macd_dea_2','industry_id_level2_macd_2','industry_id_level2_macd_positive_ratio_2','industry_id_level2_macd_dif_3','industry_id_level2_macd_dea_3','industry_id_level2_macd_3','industry_id_level2_macd_positive_ratio_3','industry_id_level2_macd_dif_5','industry_id_level2_macd_dea_5','industry_id_level2_macd_5','industry_id_level2_macd_positive_ratio_5','industry_id_level2_macd_dif_10','industry_id_level2_macd_dea_10','industry_id_level2_macd_10','industry_id_level2_macd_positive_ratio_10','industry_id_level2_macd_dif_20','industry_id_level2_macd_dea_20','industry_id_level2_macd_20','industry_id_level2_macd_positive_ratio_20','industry_id_level2_macd_dif_40','industry_id_level2_macd_dea_40','industry_id_level2_macd_40','industry_id_level2_macd_positive_ratio_40','industry_id_level2_macd_dif_dea','industry_id_level2_width_20','industry_id_level2_close_mb20_diff','industry_id_level2_cr_3d','industry_id_level2_cr_5d','industry_id_level2_cr_10d','industry_id_level2_cr_20d','industry_id_level2_cr_40d','industry_id_level2_rsi_3d','industry_id_level2_rsi_5d','industry_id_level2_rsi_10d','industry_id_level2_rsi_20d','industry_id_level2_rsi_40d','industry_id_level2_turn_3d_avg','industry_id_level2_turn_3davg_dif','industry_id_level2_turn_3dmax_dif','industry_id_level2_turn_3dmin_dif','industry_id_level2_close_3davg_dif','industry_id_level2_close_3dmax_dif','industry_id_level2_close_3dmin_dif','industry_id_level2_close_3d_dif','industry_id_level2_turn_5d_avg','industry_id_level2_turn_5davg_dif','industry_id_level2_turn_5dmax_dif','industry_id_level2_turn_5dmin_dif','industry_id_level2_turn_3_5d_avg','industry_id_level2_close_5davg_dif','industry_id_level2_close_5dmax_dif','industry_id_level2_close_5dmin_dif','industry_id_level2_close_5d_dif','industry_id_level2_close_3_5d_avg','industry_id_level2_turn_10d_avg','industry_id_level2_turn_10davg_dif','industry_id_level2_turn_10dmax_dif','industry_id_level2_turn_10dmin_dif','industry_id_level2_turn_5_10d_avg','industry_id_level2_close_10davg_dif','industry_id_level2_close_10dmax_dif','industry_id_level2_close_10dmin_dif','industry_id_level2_close_10d_dif','industry_id_level2_close_5_10d_avg','industry_id_level2_turn_20d_avg','industry_id_level2_turn_20davg_dif','industry_id_level2_turn_20dmax_dif','industry_id_level2_turn_20dmin_dif','industry_id_level2_turn_10_20d_avg','industry_id_level2_close_20davg_dif','industry_id_level2_close_20dmax_dif','industry_id_level2_close_20dmin_dif','industry_id_level2_close_20d_dif','industry_id_level2_close_10_20d_avg','industry_id_level2_turn_30d_avg','industry_id_level2_turn_30davg_dif','industry_id_level2_turn_30dmax_dif','industry_id_level2_turn_30dmin_dif','industry_id_level2_turn_20_30d_avg','industry_id_level2_close_30davg_dif','industry_id_level2_close_30dmax_dif','industry_id_level2_close_30dmin_dif','industry_id_level2_close_30d_dif','industry_id_level2_close_20_30d_avg','industry_id_level2_turn_60d_avg','industry_id_level2_turn_60davg_dif','industry_id_level2_turn_60dmax_dif','industry_id_level2_turn_60dmin_dif','industry_id_level2_turn_30_60d_avg','industry_id_level2_close_60davg_dif','industry_id_level2_close_60dmax_dif','industry_id_level2_close_60dmin_dif','industry_id_level2_close_60d_dif','industry_id_level2_close_30_60d_avg','industry_id_level2_turn_120d_avg','industry_id_level2_turn_120davg_dif','industry_id_level2_turn_120dmax_dif','industry_id_level2_turn_120dmin_dif','industry_id_level2_turn_60_120d_avg','industry_id_level2_close_120davg_dif','industry_id_level2_close_120dmax_dif','industry_id_level2_close_120dmin_dif','industry_id_level2_close_120d_dif','industry_id_level2_close_60_120d_avg','industry_id_level2_turn_240d_avg','industry_id_level2_turn_240davg_dif','industry_id_level2_turn_240dmax_dif','industry_id_level2_turn_240dmin_dif','industry_id_level2_turn_120_240d_avg','industry_id_level2_close_240davg_dif','industry_id_level2_close_240dmax_dif','industry_id_level2_close_240dmin_dif','industry_id_level2_close_240d_dif','industry_id_level2_close_120_240d_avg','industry_id_level3_open','industry_id_level3_close','industry_id_level3_preclose','industry_id_level3_high','industry_id_level3_low','industry_id_level3_turn','industry_id_level3_amount','industry_id_level3_pctChg','industry_id_level3_peTTM','industry_id_level3_pcfNcfTTM','industry_id_level3_pbMRQ','industry_id_level3_rise_ratio','industry_id_level3_open_ratio','industry_id_level3_close_ratio','industry_id_level3_high_ratio','industry_id_level3_low_ratio','industry_id_level3_open_ratio_7d_avg','industry_id_level3_close_ratio_7d_avg','industry_id_level3_high_ratio_7d_avg','industry_id_level3_low_ratio_7d_avg','industry_id_level3_rsv_5','industry_id_level3_k_value_5','industry_id_level3_d_value_5','industry_id_level3_j_value_5','industry_id_level3_k_value_trend_5','industry_id_level3_kd_value5','industry_id_level3_rsv_9','industry_id_level3_k_value_9','industry_id_level3_d_value_9','industry_id_level3_j_value_9','industry_id_level3_k_value_trend_9','industry_id_level3_kd_value9','industry_id_level3_rsv_19','industry_id_level3_k_value_19','industry_id_level3_d_value_19','industry_id_level3_j_value_19','industry_id_level3_k_value_trend_19','industry_id_level3_kd_value19','industry_id_level3_rsv_73','industry_id_level3_k_value_73','industry_id_level3_d_value_73','industry_id_level3_j_value_73','industry_id_level3_k_value_trend_73','industry_id_level3_kd_value73','industry_id_level3_macd_positive','industry_id_level3_macd_dif_ratio','industry_id_level3_macd_dif_2','industry_id_level3_macd_dea_2','industry_id_level3_macd_2','industry_id_level3_macd_positive_ratio_2','industry_id_level3_macd_dif_3','industry_id_level3_macd_dea_3','industry_id_level3_macd_3','industry_id_level3_macd_positive_ratio_3','industry_id_level3_macd_dif_5','industry_id_level3_macd_dea_5','industry_id_level3_macd_5','industry_id_level3_macd_positive_ratio_5','industry_id_level3_macd_dif_10','industry_id_level3_macd_dea_10','industry_id_level3_macd_10','industry_id_level3_macd_positive_ratio_10','industry_id_level3_macd_dif_20','industry_id_level3_macd_dea_20','industry_id_level3_macd_20','industry_id_level3_macd_positive_ratio_20','industry_id_level3_macd_dif_40','industry_id_level3_macd_dea_40','industry_id_level3_macd_40','industry_id_level3_macd_positive_ratio_40','industry_id_level3_macd_dif_dea','industry_id_level3_width_20','industry_id_level3_close_mb20_diff','industry_id_level3_cr_3d','industry_id_level3_cr_5d','industry_id_level3_cr_10d','industry_id_level3_cr_20d','industry_id_level3_cr_40d','industry_id_level3_rsi_3d','industry_id_level3_rsi_5d','industry_id_level3_rsi_10d','industry_id_level3_rsi_20d','industry_id_level3_rsi_40d','industry_id_level3_turn_3d_avg','industry_id_level3_turn_3davg_dif','industry_id_level3_turn_3dmax_dif','industry_id_level3_turn_3dmin_dif','industry_id_level3_close_3davg_dif','industry_id_level3_close_3dmax_dif','industry_id_level3_close_3dmin_dif','industry_id_level3_close_3d_dif','industry_id_level3_turn_5d_avg','industry_id_level3_turn_5davg_dif','industry_id_level3_turn_5dmax_dif','industry_id_level3_turn_5dmin_dif','industry_id_level3_turn_3_5d_avg','industry_id_level3_close_5davg_dif','industry_id_level3_close_5dmax_dif','industry_id_level3_close_5dmin_dif','industry_id_level3_close_5d_dif','industry_id_level3_close_3_5d_avg','industry_id_level3_turn_10d_avg','industry_id_level3_turn_10davg_dif','industry_id_level3_turn_10dmax_dif','industry_id_level3_turn_10dmin_dif','industry_id_level3_turn_5_10d_avg','industry_id_level3_close_10davg_dif','industry_id_level3_close_10dmax_dif','industry_id_level3_close_10dmin_dif','industry_id_level3_close_10d_dif','industry_id_level3_close_5_10d_avg','industry_id_level3_turn_20d_avg','industry_id_level3_turn_20davg_dif','industry_id_level3_turn_20dmax_dif','industry_id_level3_turn_20dmin_dif','industry_id_level3_turn_10_20d_avg','industry_id_level3_close_20davg_dif','industry_id_level3_close_20dmax_dif','industry_id_level3_close_20dmin_dif','industry_id_level3_close_20d_dif','industry_id_level3_close_10_20d_avg','industry_id_level3_turn_30d_avg','industry_id_level3_turn_30davg_dif','industry_id_level3_turn_30dmax_dif','industry_id_level3_turn_30dmin_dif','industry_id_level3_turn_20_30d_avg','industry_id_level3_close_30davg_dif','industry_id_level3_close_30dmax_dif','industry_id_level3_close_30dmin_dif','industry_id_level3_close_30d_dif','industry_id_level3_close_20_30d_avg','industry_id_level3_turn_60d_avg','industry_id_level3_turn_60davg_dif','industry_id_level3_turn_60dmax_dif','industry_id_level3_turn_60dmin_dif','industry_id_level3_turn_30_60d_avg','industry_id_level3_close_60davg_dif','industry_id_level3_close_60dmax_dif','industry_id_level3_close_60dmin_dif','industry_id_level3_close_60d_dif','industry_id_level3_close_30_60d_avg','industry_id_level3_turn_120d_avg','industry_id_level3_turn_120davg_dif','industry_id_level3_turn_120dmax_dif','industry_id_level3_turn_120dmin_dif','industry_id_level3_turn_60_120d_avg','industry_id_level3_close_120davg_dif','industry_id_level3_close_120dmax_dif','industry_id_level3_close_120dmin_dif','industry_id_level3_close_120d_dif','industry_id_level3_close_60_120d_avg','industry_id_level3_turn_240d_avg','industry_id_level3_turn_240davg_dif','industry_id_level3_turn_240dmax_dif','industry_id_level3_turn_240dmin_dif','industry_id_level3_turn_120_240d_avg','industry_id_level3_close_240davg_dif','industry_id_level3_close_240dmax_dif','industry_id_level3_close_240dmin_dif','industry_id_level3_close_240d_dif','industry_id_level3_close_120_240d_avg','all_pctChg','all_turn','all_rise_ratio','all_pctChg_3','all_turn_3','all_rise_ratio_3','all_pctChg_5','all_turn_5','all_rise_ratio_5','all_pctChg_10','all_turn_10','all_rise_ratio_10','zs_open_ratio','zs_close_ratio','zs_high_ratio','zs_low_ratio','zs_pctChg','zs_open_ratio_7d_avg','zs_close_ratio_7d_avg','zs_high_ratio_7d_avg','zs_low_ratio_7d_avg','zs_amount','zs_turn','zs_rsv_5','zs_k_value_5','zs_d_value_5','zs_j_value_5','zs_k_value_trend_5','zs_kd_value5','zs_rsv_9','zs_k_value_9','zs_d_value_9','zs_j_value_9','zs_k_value_trend_9','zs_kd_value9','zs_rsv_19','zs_k_value_19','zs_d_value_19','zs_j_value_19','zs_k_value_trend_19','zs_kd_value19','zs_rsv_73','zs_k_value_73','zs_d_value_73','zs_j_value_73','zs_k_value_trend_73','zs_kd_value73','zs_macd_positive','zs_macd_dif_ratio','zs_macd_dif_2','zs_macd_dea_2','zs_macd_2','zs_macd_positive_ratio_2','zs_macd_dif_3','zs_macd_dea_3','zs_macd_3','zs_macd_positive_ratio_3','zs_macd_dif_5','zs_macd_dea_5','zs_macd_5','zs_macd_positive_ratio_5','zs_macd_dif_10','zs_macd_dea_10','zs_macd_10','zs_macd_positive_ratio_10','zs_macd_dif_20','zs_macd_dea_20','zs_macd_20','zs_macd_positive_ratio_20','zs_macd_dif_40','zs_macd_dea_40','zs_macd_40','zs_macd_positive_ratio_40','zs_macd_dif_dea','zs_width_20','zs_close_mb20_diff','zs_cr_3d','zs_cr_5d','zs_cr_10d','zs_cr_20d','zs_cr_40d','zs_rsi_3d','zs_rsi_5d','zs_rsi_10d','zs_rsi_20d','zs_rsi_40d','zs_turn_3d_avg','zs_turn_3davg_dif','zs_turn_3dmax_dif','zs_turn_3dmin_dif','zs_close_3davg_dif','zs_close_3dmax_dif','zs_close_3dmin_dif','zs_close_3d_dif','zs_turn_5d_avg','zs_turn_5davg_dif','zs_turn_5dmax_dif','zs_turn_5dmin_dif','zs_turn_3_5d_avg','zs_close_5davg_dif','zs_close_5dmax_dif','zs_close_5dmin_dif','zs_close_5d_dif','zs_close_3_5d_avg','zs_turn_10d_avg','zs_turn_10davg_dif','zs_turn_10dmax_dif','zs_turn_10dmin_dif','zs_turn_5_10d_avg','zs_close_10davg_dif','zs_close_10dmax_dif','zs_close_10dmin_dif','zs_close_10d_dif','zs_close_5_10d_avg','zs_turn_20d_avg','zs_turn_20davg_dif','zs_turn_20dmax_dif','zs_turn_20dmin_dif','zs_turn_10_20d_avg','zs_close_20davg_dif','zs_close_20dmax_dif','zs_close_20dmin_dif','zs_close_20d_dif','zs_close_10_20d_avg','zs_turn_30d_avg','zs_turn_30davg_dif','zs_turn_30dmax_dif','zs_turn_30dmin_dif','zs_turn_20_30d_avg','zs_close_30davg_dif','zs_close_30dmax_dif','zs_close_30dmin_dif','zs_close_30d_dif','zs_close_20_30d_avg','zs_turn_60d_avg','zs_turn_60davg_dif','zs_turn_60dmax_dif','zs_turn_60dmin_dif','zs_turn_30_60d_avg','zs_close_60davg_dif','zs_close_60dmax_dif','zs_close_60dmin_dif','zs_close_60d_dif','zs_close_30_60d_avg','zs_turn_120d_avg','zs_turn_120davg_dif','zs_turn_120dmax_dif','zs_turn_120dmin_dif','zs_turn_60_120d_avg','zs_close_120davg_dif','zs_close_120dmax_dif','zs_close_120dmin_dif','zs_close_120d_dif','zs_close_60_120d_avg','zs_turn_240d_avg','zs_turn_240davg_dif','zs_turn_240dmax_dif','zs_turn_240dmin_dif','zs_turn_120_240d_avg','zs_close_240davg_dif','zs_close_240dmax_dif','zs_close_240dmin_dif','zs_close_240d_dif','zs_close_120_240d_avg','label_7','label_7_real','label_7_weight','label_7_max','label_7_max_real','label_7_max_weight','label_15','label_15_real','label_15_weight','label_15_max','label_15_max_real','label_15_max_weight']
+# train_data_raw = train_data_raw[columns]
+# train_data_raw.to_csv(train_data_path, mode='a', header=True, index=False, encoding='utf-8')
 
 
 
-# key_name = 'code'
-# hash_bucket = 10
-# val_name = 'names'
-# cate_feature = tf.feature_column.categorical_column_with_hash_bucket(key_name,hash_bucket,dtype=tf.string)
-# if val_name != "":
-#     w_cate_feature = tf.feature_column.weighted_categorical_column(cate_feature,val_name,dtype=tf.float32)
+# import pandas as pd
+# year = 2021
+# model_name = 'model_v6'
+# saved_model_name = 'saved_model_v6'
+# train_data_path_raw = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+# train_data_path = 'E:/pythonProject/future/data/datafile/sample/{model_name}/test_shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+# train_data_raw = pd.read_csv(train_data_path)
 #
-# dicts = {'other_feas': []}
-# dicts['other_feas'].append('1')
-#
-# print(dicts)
-#
+# print(train_data_raw['industry_id_level1_open'])
 
-l = [2,3,4]
-sums = 0
-for  i  in l :
-    sums +=i
-sums+=i
-print(sums)
+import pandas as pd
+path = 'E:/pythonProject/future/data/datafile/raw_feature/code_k_data_v5_2021.csv'
+raw_k_data = pd.read_csv(path)
+# raw_k_data['date'] = pd.to_datetime(raw_k_data['date'])
+raw_k_data=raw_k_data[raw_k_data['date']=='2021-01-07']
+
+raw_k_data = raw_k_data[raw_k_data['industry_id_level3'] > 0]
+raw_k_data["pctChg"] = pd.to_numeric(raw_k_data["pctChg"], errors='coerce')
+raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] <= 20) & (
+			raw_k_data['pctChg'] >= -20)]
+raw_k_data.to_csv('E:/pythonProject/future/data/datafile/raw_feature/test_code_k_data_v5_2021.csv', mode='a', header=True, index=False, encoding='utf-8')
+raw_k_data['date'] = pd.to_datetime(raw_k_data['date'])
+raw_k_data['pctChg'] = raw_k_data['pctChg'].map(lambda x: x / 100.0)
+print(raw_k_data[['date', 'pctChg', 'turn']].groupby('date').mean())
+
