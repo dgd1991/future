@@ -113,6 +113,7 @@ class Feature(object):
 		feature_all['macd_dif_dea'] = (tmp['macd_dif']-tmp['macd_dea']).groupby(level=0).apply(lambda x: x.rolling(min_periods=2, window=2, center=False).apply(lambda x: 2 if x[1]>0 and x[0]<0 else (0 if x[1]<0 and x[0]>0 else 1)))
 
 		# boll线
+		# 效果很好，可以多做几天的，比如3天，5天，10天，40天
 		tmp['mb_20'] = tmp['close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=20, center=False).mean())
 		tmp['md_20'] = tmp['close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=20, center=False).std())
 		tmp['up_20'] = tmp['mb_20'] + 2 * tmp['md_20']
@@ -121,6 +122,7 @@ class Feature(object):
 		feature_all['close_mb20_diff'] = (tmp['close'] - tmp['mb_20'])/(2 * tmp['md_20'])
 
 		# cr指标
+		# 似乎对中长期的指数cr指标效果较好
 		tmp = raw_k_data[['close', 'open', 'high', 'low']]
 		tmp['cr_m'] = (tmp['close'] + tmp['open'] + tmp['high'] + tmp['low'])/4
 		tmp['cr_ym'] = tmp['cr_m'].groupby(level=0).apply(lambda x: x.rolling(min_periods=2, window=2, center=False).apply(lambda y: y[0]))
