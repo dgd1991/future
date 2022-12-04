@@ -12,7 +12,7 @@ def float2Bucket(raw, base, floor, ceil, bucket_Size):
             return int(math.floor(raw * base) % bucket_Size)
 
 def bignumber2Bucket(raw, log, bucket_Size):
-    if not raw or math.isnan(raw):
+    if not raw or math.isnan(raw) or math.isinf(raw):
         return bucket_Size + 1
     else:
         raw = float(raw)
