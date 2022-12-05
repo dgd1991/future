@@ -331,7 +331,8 @@ class Feature(object):
       gc.collect()
       if os.path.isfile('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level1_' + str(year-1) + '.csv'):
           industry_id_level1_k_data_his = pd.read_csv('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level1_' + str(year-1) + '.csv')
-          industry_id_level1_k_data_his = industry_id_level1_k_data_his[['industry_id_level1_close']]
+          industry_id_level1_k_data_his = industry_id_level1_k_data_his[['industry_id_level1','date','industry_id_level1_close']]
+          industry_id_level1_k_data_his['date'] = pd.to_datetime(industry_id_level1_k_data_his['date'])
       industry_id_level1_k_data = industry_id_level1_k_data.reset_index(level=0, drop=False)
       industry_id_level1_k_data = industry_id_level1_k_data.reset_index(level=0, drop=False)
       if os.path.isfile('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level1_' + str(year-1) + '.csv'):
@@ -350,7 +351,12 @@ class Feature(object):
       industry_id_level1_k_data['industry_id_level1_low'] = industry_id_level1_k_data['industry_id_level1_preclose']*(industry_id_level1_k_data['industry_id_level1_low_ratio'].apply(lambda x: x + 1)).round(5)
 
       # 写出指数点数
-      industry_id_level1_k_data[['industry_id_level1','date','industry_id_level1_open', 'industry_id_level1_close', 'industry_id_level1_high', 'industry_id_level1_low']].to_csv('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level1_' + str(year) + '.csv', mode='w', header=True, index=False)
+      industry_id_level1_k_data_out = industry_id_level1_k_data[['industry_id_level1_open', 'industry_id_level1_close', 'industry_id_level1_high', 'industry_id_level1_low']]
+      industry_id_level1_k_data_out = industry_id_level1_k_data_out.reset_index(level=0, drop=False)
+      industry_id_level1_k_data_out = industry_id_level1_k_data_out.reset_index(level=0, drop=False)
+      industry_id_level1_k_data_out.to_csv('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level1_' + str(year) + '.csv', mode='w', header=True, index=False)
+      del industry_id_level1_k_data_out
+      gc.collect()
 
       industry_id_level1_k_data['industry_id_level1_open_ratio_7d_avg'] = industry_id_level1_k_data['industry_id_level1_open_ratio'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=7, center=False).mean()).round(5)
       industry_id_level1_k_data['industry_id_level1_close_ratio_7d_avg'] = industry_id_level1_k_data['industry_id_level1_close_ratio'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=7, center=False).mean()).round(5)
@@ -567,7 +573,8 @@ class Feature(object):
       gc.collect()
       if os.path.isfile('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level2_' + str(year-1) + '.csv'):
           industry_id_level2_k_data_his = pd.read_csv('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level2_' + str(year-1) + '.csv')
-          industry_id_level2_k_data_his = industry_id_level2_k_data_his[['industry_id_level2_close']]
+          industry_id_level2_k_data_his = industry_id_level2_k_data_his[['industry_id_level2','date','industry_id_level2_close']]
+          industry_id_level2_k_data_his['date'] = pd.to_datetime(industry_id_level2_k_data_his['date'])
       industry_id_level2_k_data = industry_id_level2_k_data.reset_index(level=0, drop=False)
       industry_id_level2_k_data = industry_id_level2_k_data.reset_index(level=0, drop=False)
       if os.path.isfile('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level2_' + str(year-1) + '.csv'):
@@ -586,7 +593,12 @@ class Feature(object):
       industry_id_level2_k_data['industry_id_level2_low'] = industry_id_level2_k_data['industry_id_level2_preclose']*(industry_id_level2_k_data['industry_id_level2_low_ratio'].apply(lambda x: x + 1)).round(5)
 
       # 写出指数点数
-      industry_id_level2_k_data[['industry_id_level2','date', 'industry_id_level2_open', 'industry_id_level2_close', 'industry_id_level2_high', 'industry_id_level2_low']].to_csv('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level2_' + str(year) + '.csv', mode='w', header=True, index=False)
+      industry_id_level2_k_data_out = industry_id_level2_k_data[['industry_id_level2_open', 'industry_id_level2_close', 'industry_id_level2_high', 'industry_id_level2_low']]
+      industry_id_level2_k_data_out = industry_id_level2_k_data_out.reset_index(level=0, drop=False)
+      industry_id_level2_k_data_out = industry_id_level2_k_data_out.reset_index(level=0, drop=False)
+      industry_id_level2_k_data_out.to_csv('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level2_' + str(year) + '.csv', mode='w', header=True, index=False)
+      del industry_id_level2_k_data_out
+      gc.collect()
 
       industry_id_level2_k_data['industry_id_level2_open_ratio_7d_avg'] = industry_id_level2_k_data['industry_id_level2_open_ratio'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=7, center=False).mean()).round(5)
       industry_id_level2_k_data['industry_id_level2_close_ratio_7d_avg'] = industry_id_level2_k_data['industry_id_level2_close_ratio'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=7, center=False).mean()).round(5)
@@ -803,7 +815,8 @@ class Feature(object):
       gc.collect()
       if os.path.isfile('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level3_' + str(year-1) + '.csv'):
           industry_id_level3_k_data_his = pd.read_csv('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level3_' + str(year-1) + '.csv')
-          industry_id_level3_k_data_his = industry_id_level3_k_data_his[['industry_id_level3_close']]
+          industry_id_level3_k_data_his = industry_id_level3_k_data_his[['industry_id_level3','date','industry_id_level3_close']]
+          industry_id_level3_k_data_his['date'] = pd.to_datetime(industry_id_level3_k_data_his['date'])
       industry_id_level3_k_data = industry_id_level3_k_data.reset_index(level=0, drop=False)
       industry_id_level3_k_data = industry_id_level3_k_data.reset_index(level=0, drop=False)
       if os.path.isfile('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level3_' + str(year-1) + '.csv'):
@@ -822,7 +835,12 @@ class Feature(object):
       industry_id_level3_k_data['industry_id_level3_low'] = industry_id_level3_k_data['industry_id_level3_preclose']*(industry_id_level3_k_data['industry_id_level3_low_ratio'].apply(lambda x: x + 1)).round(5)
 
       # 写出指数点数
-      industry_id_level3_k_data[['industry_id_level3','date','industry_id_level3_open', 'industry_id_level3_close', 'industry_id_level3_high', 'industry_id_level3_low']].to_csv('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level3_' + str(year) + '.csv', mode='w', header=True, index=False)
+      industry_id_level3_k_data_out = industry_id_level3_k_data[['industry_id_level3_open', 'industry_id_level3_close', 'industry_id_level3_high', 'industry_id_level3_low']]
+      industry_id_level3_k_data_out = industry_id_level3_k_data_out.reset_index(level=0, drop=False)
+      industry_id_level3_k_data_out = industry_id_level3_k_data_out.reset_index(level=0, drop=False)
+      industry_id_level3_k_data_out.to_csv('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level3_' + str(year) + '.csv', mode='w', header=True, index=False)
+      del industry_id_level3_k_data_out
+      gc.collect()
 
       industry_id_level3_k_data['industry_id_level3_open_ratio_7d_avg'] = industry_id_level3_k_data['industry_id_level3_open_ratio'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=7, center=False).mean()).round(5)
       industry_id_level3_k_data['industry_id_level3_close_ratio_7d_avg'] = industry_id_level3_k_data['industry_id_level3_close_ratio'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=7, center=False).mean()).round(5)
@@ -1045,7 +1063,7 @@ class Feature(object):
       gc.collect()
       return feature_all
 if __name__ == '__main__':
-   years = [2008,2009]
+   years = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022]
    is_predict = False
    date = '2022-11-17'
    # years = [2008]
