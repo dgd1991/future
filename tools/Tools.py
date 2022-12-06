@@ -1,3 +1,4 @@
+import hashlib
 import math
 import numpy as np
 import pandas as pd
@@ -102,6 +103,11 @@ class Tools(object):
         if len(day) == 1:
            day = '0' + day
         return year + '-' + month + '-' + day
+    def hash_bucket(self, string_input, bucket_size):
+        hash_code = hashlib.sha1(string_input.encode('utf-8')).hexdigest()
+        int_num = int(hash_code, 16)
+        index = int_num % bucket_size
+        return index
 if __name__ == "__main__":
     tools = Tools()
     # industry_dic = tools.get_industry_dictionary()

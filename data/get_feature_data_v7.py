@@ -169,8 +169,8 @@ class Feature(object):
          tmp['md_' + str(day_cnt)] = tmp['close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=day_cnt, center=False).std())
          tmp['up_' + str(day_cnt)] = tmp['mb_' + str(day_cnt)] + 2 * tmp['md_' + str(day_cnt)]
          tmp['dn_' + str(day_cnt)] = tmp['mb_' + str(day_cnt)] - 2 * tmp['md_' + str(day_cnt)]
-         feature_all['width_' + str(day_cnt)] = (4 * tmp['md_' + str(day_cnt)] / tmp['mb_' + str(day_cnt)]).round(5)
-         feature_all['close_mb' + str(day_cnt) + '_diff'] = ((tmp['close'] - tmp['mb_' + str(day_cnt)])/(2 * tmp['md_' + str(day_cnt)])).round(5)
+         feature_all['width_' + str(day_cnt)] = (4 * tmp['md_' + str(day_cnt)] / tmp['mb_' + str(day_cnt)]).apply(lambda x: max(x, -3) if x<0 else min(x, 3)).round(5)
+         feature_all['close_mb' + str(day_cnt) + '_diff'] = ((tmp['close'] - tmp['mb_' + str(day_cnt)])/(2 * tmp['md_' + str(day_cnt)])).apply(lambda x: max(x, -3) if x<0 else min(x, 3)).round(5)
 
       # cr指标
       # 似乎对中长期的指数cr指标效果较好，重新设计
@@ -187,7 +187,7 @@ class Feature(object):
          tmp['cr_b_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=10, center=False).mean())
          tmp['cr_c_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=20, center=False).mean())
          tmp['cr_d_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=60, center=False).mean())
-         feature_all['cr_bias_' + str(day_cnt) + 'd'] = (tmp['cr_' + str(day_cnt) + 'd']/tmp['cr_a_' + str(day_cnt) + 'd']).round(5)
+         feature_all['cr_bias_' + str(day_cnt) + 'd'] = (tmp['cr_' + str(day_cnt) + 'd']/tmp['cr_a_' + str(day_cnt) + 'd']).apply(lambda x: max(x, -3) if x<0 else min(x, 3)).round(5)
          feature_all['cr_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].map(lambda x: float2Bucket(float(x)*100, 0.1, 0, 300, 30))
 
          tmp['cr_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].map(lambda x: str(float2Bucket(float(x)*100, 0.05, 0, 300, 15)))
@@ -196,10 +196,9 @@ class Feature(object):
          tmp['cr_c_' + str(day_cnt) + 'd'] = tmp['cr_c_' + str(day_cnt) + 'd'].map(lambda x: str(float2Bucket(float(x)*100, 0.05, 0, 300, 15)))
          tmp['cr_d_' + str(day_cnt) + 'd'] = tmp['cr_d_' + str(day_cnt) + 'd'].map(lambda x: str(float2Bucket(float(x)*100, 0.05, 0, 300, 15)))
          # bucket空间可以设置成 75万，多个特征可以共享embedding
-         feature_all['cr_trend_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].str.cat([tmp['cr_a_' + str(day_cnt) + 'd'],tmp['cr_b_' + str(day_cnt) + 'd'],tmp['cr_c_' + str(day_cnt) + 'd'],tmp['cr_d_' + str(day_cnt) + 'd']], sep='_')
+         feature_all['cr_trend_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].str.cat([tmp['cr_a_' + str(day_cnt) + 'd'],tmp['cr_b_' + str(day_cnt) + 'd'],tmp['cr_c_' + str(day_cnt) + 'd'],tmp['cr_d_' + str(day_cnt) + 'd']], sep='_').apply(lambda x: self.tools.hash_bucket(x, 750000))
          for day_cnt_new in range(4):
-            feature_all = feature_all.groupby(level=0).apply(lambda x: self._object_rolling(x, 'cr_trend_' + str(day_cnt) + 'd', 'cr_trend_' + str(day_cnt) + 'd' + '_' + str(day_cnt_new), day_cnt_new+2, 0))
-
+            feature_all['cr_trend_' + str(day_cnt) + 'd' + '_' + str(day_cnt_new)] = feature_all['cr_trend_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=day_cnt_new+2, window=day_cnt_new+2, center=False).apply(lambda y: y[0]))
       # rsi指标
       tmp = raw_k_data[['close', 'preclose']]
       tmp['price_dif'] = tmp['close'] - tmp['preclose']
@@ -410,8 +409,8 @@ class Feature(object):
          tmp['md_' + str(day_cnt)] = tmp['industry_id_level1_close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=day_cnt, center=False).std())
          tmp['up_' + str(day_cnt)] = tmp['mb_' + str(day_cnt)] + 2 * tmp['md_' + str(day_cnt)]
          tmp['dn_' + str(day_cnt)] = tmp['mb_' + str(day_cnt)] - 2 * tmp['md_' + str(day_cnt)]
-         industry_id_level1_k_data['industry_id_level1_width_' + str(day_cnt)] = (4 * tmp['md_' + str(day_cnt)] / tmp['mb_' + str(day_cnt)]).round(5)
-         industry_id_level1_k_data['industry_id_level1_close_mb' + str(day_cnt) + '_diff'] = ((tmp['industry_id_level1_close'] - tmp['mb_' + str(day_cnt)])/(2 * tmp['md_' + str(day_cnt)])).round(5)
+         industry_id_level1_k_data['industry_id_level1_width_' + str(day_cnt)] = (4 * tmp['md_' + str(day_cnt)] / tmp['mb_' + str(day_cnt)]).apply(lambda x: max(x, -3) if x<0 else min(x, 3)).round(5)
+         industry_id_level1_k_data['industry_id_level1_close_mb' + str(day_cnt) + '_diff'] = ((tmp['industry_id_level1_close'] - tmp['mb_' + str(day_cnt)])/(2 * tmp['md_' + str(day_cnt)])).apply(lambda x: max(x, -3) if x<0 else min(x, 3)).round(5)
 
       # cr指标
       tmp = industry_id_level1_k_data[["industry_id_level1_close", "industry_id_level1_open", "industry_id_level1_high", "industry_id_level1_low"]]
@@ -427,7 +426,7 @@ class Feature(object):
          tmp['cr_b_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=10, center=False).mean())
          tmp['cr_c_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=20, center=False).mean())
          tmp['cr_d_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=60, center=False).mean())
-         industry_id_level1_k_data['industry_id_level1_cr_bias_' + str(day_cnt) + 'd'] = (tmp['cr_' + str(day_cnt) + 'd']/tmp['cr_a_' + str(day_cnt) + 'd']).round(5)
+         industry_id_level1_k_data['industry_id_level1_cr_bias_' + str(day_cnt) + 'd'] = (tmp['cr_' + str(day_cnt) + 'd']/tmp['cr_a_' + str(day_cnt) + 'd']).apply(lambda x: max(x, -3) if x<0 else min(x, 3)).round(5)
          industry_id_level1_k_data['industry_id_level1_cr_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].map(lambda x: float2Bucket(float(x)*100, 0.1, 0, 300, 30))
 
          tmp['cr_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].map(lambda x: str(float2Bucket(float(x)*100, 0.05, 0, 300, 15)))
@@ -436,10 +435,9 @@ class Feature(object):
          tmp['cr_c_' + str(day_cnt) + 'd'] = tmp['cr_c_' + str(day_cnt) + 'd'].map(lambda x: str(float2Bucket(float(x)*100, 0.05, 0, 300, 15)))
          tmp['cr_d_' + str(day_cnt) + 'd'] = tmp['cr_d_' + str(day_cnt) + 'd'].map(lambda x: str(float2Bucket(float(x)*100, 0.05, 0, 300, 15)))
          # bucket空间可以设置成 75万，多个特征可以共享embedding
-         industry_id_level1_k_data['industry_id_level1_cr_trend_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].str.cat([tmp['cr_a_' + str(day_cnt) + 'd'],tmp['cr_b_' + str(day_cnt) + 'd'],tmp['cr_c_' + str(day_cnt) + 'd'],tmp['cr_d_' + str(day_cnt) + 'd']], sep='_')
+         industry_id_level1_k_data['industry_id_level1_cr_trend_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].str.cat([tmp['cr_a_' + str(day_cnt) + 'd'],tmp['cr_b_' + str(day_cnt) + 'd'],tmp['cr_c_' + str(day_cnt) + 'd'],tmp['cr_d_' + str(day_cnt) + 'd']], sep='_').apply(lambda x: self.tools.hash_bucket(x, 750000))
          for day_cnt_new in range(4):
-            industry_id_level1_k_data = industry_id_level1_k_data.groupby(level=0).apply(lambda x: self._object_rolling(x, 'industry_id_level1_cr_trend_' + str(day_cnt) + 'd', 'industry_id_level1_cr_trend_' + str(day_cnt) + 'd' + '_' + str(day_cnt_new), day_cnt_new+2, 0))
-
+            industry_id_level1_k_data['industry_id_level1_cr_trend_' + str(day_cnt) + 'd' + '_' + str(day_cnt_new)] = industry_id_level1_k_data['industry_id_level1_cr_trend_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=day_cnt_new+2, window=day_cnt_new+2, center=False).apply(lambda y: y[0]))
       # rsi指标
       tmp = industry_id_level1_k_data[["industry_id_level1_close", "industry_id_level1_preclose"]]
       tmp['price_dif'] = tmp["industry_id_level1_close"] - tmp["industry_id_level1_preclose"]
@@ -652,8 +650,8 @@ class Feature(object):
          tmp['md_' + str(day_cnt)] = tmp['industry_id_level2_close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=day_cnt, center=False).std())
          tmp['up_' + str(day_cnt)] = tmp['mb_' + str(day_cnt)] + 2 * tmp['md_' + str(day_cnt)]
          tmp['dn_' + str(day_cnt)] = tmp['mb_' + str(day_cnt)] - 2 * tmp['md_' + str(day_cnt)]
-         industry_id_level2_k_data['industry_id_level2_width_' + str(day_cnt)] = (4 * tmp['md_' + str(day_cnt)] / tmp['mb_' + str(day_cnt)]).round(5)
-         industry_id_level2_k_data['industry_id_level2_close_mb' + str(day_cnt) + '_diff'] = ((tmp['industry_id_level2_close'] - tmp['mb_' + str(day_cnt)])/(2 * tmp['md_' + str(day_cnt)])).round(5)
+         industry_id_level2_k_data['industry_id_level2_width_' + str(day_cnt)] = (4 * tmp['md_' + str(day_cnt)] / tmp['mb_' + str(day_cnt)]).apply(lambda x: max(x, -3) if x<0 else min(x, 3)).round(5)
+         industry_id_level2_k_data['industry_id_level2_close_mb' + str(day_cnt) + '_diff'] = ((tmp['industry_id_level2_close'] - tmp['mb_' + str(day_cnt)])/(2 * tmp['md_' + str(day_cnt)])).apply(lambda x: max(x, -3) if x<0 else min(x, 3)).round(5)
 
       # cr指标
       tmp = industry_id_level2_k_data[["industry_id_level2_close", "industry_id_level2_open", "industry_id_level2_high", "industry_id_level2_low"]]
@@ -669,7 +667,7 @@ class Feature(object):
          tmp['cr_b_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=10, center=False).mean())
          tmp['cr_c_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=20, center=False).mean())
          tmp['cr_d_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=60, center=False).mean())
-         industry_id_level2_k_data['industry_id_level2_cr_bias_' + str(day_cnt) + 'd'] = (tmp['cr_' + str(day_cnt) + 'd']/tmp['cr_a_' + str(day_cnt) + 'd']).round(5)
+         industry_id_level2_k_data['industry_id_level2_cr_bias_' + str(day_cnt) + 'd'] = (tmp['cr_' + str(day_cnt) + 'd']/tmp['cr_a_' + str(day_cnt) + 'd']).apply(lambda x: max(x, -3) if x<0 else min(x, 3)).round(5)
          industry_id_level2_k_data['industry_id_level2_cr_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].map(lambda x: float2Bucket(float(x)*100, 0.1, 0, 300, 30))
 
          tmp['cr_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].map(lambda x: str(float2Bucket(float(x)*100, 0.05, 0, 300, 15)))
@@ -678,9 +676,9 @@ class Feature(object):
          tmp['cr_c_' + str(day_cnt) + 'd'] = tmp['cr_c_' + str(day_cnt) + 'd'].map(lambda x: str(float2Bucket(float(x)*100, 0.05, 0, 300, 15)))
          tmp['cr_d_' + str(day_cnt) + 'd'] = tmp['cr_d_' + str(day_cnt) + 'd'].map(lambda x: str(float2Bucket(float(x)*100, 0.05, 0, 300, 15)))
          # bucket空间可以设置成 75万，多个特征可以共享embedding
-         industry_id_level2_k_data['industry_id_level2_cr_trend_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].str.cat([tmp['cr_a_' + str(day_cnt) + 'd'],tmp['cr_b_' + str(day_cnt) + 'd'],tmp['cr_c_' + str(day_cnt) + 'd'],tmp['cr_d_' + str(day_cnt) + 'd']], sep='_')
+         industry_id_level2_k_data['industry_id_level2_cr_trend_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].str.cat([tmp['cr_a_' + str(day_cnt) + 'd'],tmp['cr_b_' + str(day_cnt) + 'd'],tmp['cr_c_' + str(day_cnt) + 'd'],tmp['cr_d_' + str(day_cnt) + 'd']], sep='_').apply(lambda x: self.tools.hash_bucket(x, 750000))
          for day_cnt_new in range(4):
-            industry_id_level2_k_data = industry_id_level2_k_data.groupby(level=0).apply(lambda x: self._object_rolling(x, 'industry_id_level2_cr_trend_' + str(day_cnt) + 'd', 'industry_id_level2_cr_trend_' + str(day_cnt) + 'd' + '_' + str(day_cnt_new), day_cnt_new+2, 0))
+            industry_id_level2_k_data['industry_id_level2_cr_trend_' + str(day_cnt) + 'd' + '_' + str(day_cnt_new)] = industry_id_level2_k_data['industry_id_level2_cr_trend_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=day_cnt_new+2, window=day_cnt_new+2, center=False).apply(lambda y: y[0]))
 
       # rsi指标
       tmp = industry_id_level2_k_data[["industry_id_level2_close", "industry_id_level2_preclose"]]
@@ -894,8 +892,8 @@ class Feature(object):
          tmp['md_' + str(day_cnt)] = tmp['industry_id_level3_close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=day_cnt, center=False).std())
          tmp['up_' + str(day_cnt)] = tmp['mb_' + str(day_cnt)] + 2 * tmp['md_' + str(day_cnt)]
          tmp['dn_' + str(day_cnt)] = tmp['mb_' + str(day_cnt)] - 2 * tmp['md_' + str(day_cnt)]
-         industry_id_level3_k_data['industry_id_level3_width_' + str(day_cnt)] = (4 * tmp['md_' + str(day_cnt)] / tmp['mb_' + str(day_cnt)]).round(5)
-         industry_id_level3_k_data['industry_id_level3_close_mb' + str(day_cnt) + '_diff'] = ((tmp['industry_id_level3_close'] - tmp['mb_' + str(day_cnt)])/(2 * tmp['md_' + str(day_cnt)])).round(5)
+         industry_id_level3_k_data['industry_id_level3_width_' + str(day_cnt)] = (4 * tmp['md_' + str(day_cnt)] / tmp['mb_' + str(day_cnt)]).apply(lambda x: max(x, -3) if x<0 else min(x, 3)).round(5)
+         industry_id_level3_k_data['industry_id_level3_close_mb' + str(day_cnt) + '_diff'] = ((tmp['industry_id_level3_close'] - tmp['mb_' + str(day_cnt)])/(2 * tmp['md_' + str(day_cnt)])).apply(lambda x: max(x, -3) if x<0 else min(x, 3)).round(5)
 
       # cr指标
       tmp = industry_id_level3_k_data[["industry_id_level3_close", "industry_id_level3_open", "industry_id_level3_high", "industry_id_level3_low"]]
@@ -911,7 +909,7 @@ class Feature(object):
          tmp['cr_b_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=10, center=False).mean())
          tmp['cr_c_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=20, center=False).mean())
          tmp['cr_d_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=60, center=False).mean())
-         industry_id_level3_k_data['industry_id_level3_cr_bias_' + str(day_cnt) + 'd'] = (tmp['cr_' + str(day_cnt) + 'd']/tmp['cr_a_' + str(day_cnt) + 'd']).round(5)
+         industry_id_level3_k_data['industry_id_level3_cr_bias_' + str(day_cnt) + 'd'] = (tmp['cr_' + str(day_cnt) + 'd']/tmp['cr_a_' + str(day_cnt) + 'd']).apply(lambda x: max(x, -3) if x<0 else min(x, 3)).round(5)
          industry_id_level3_k_data['industry_id_level3_cr_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].map(lambda x: float2Bucket(float(x)*100, 0.1, 0, 300, 30))
 
          tmp['cr_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].map(lambda x: str(float2Bucket(float(x)*100, 0.05, 0, 300, 15)))
@@ -920,9 +918,9 @@ class Feature(object):
          tmp['cr_c_' + str(day_cnt) + 'd'] = tmp['cr_c_' + str(day_cnt) + 'd'].map(lambda x: str(float2Bucket(float(x)*100, 0.05, 0, 300, 15)))
          tmp['cr_d_' + str(day_cnt) + 'd'] = tmp['cr_d_' + str(day_cnt) + 'd'].map(lambda x: str(float2Bucket(float(x)*100, 0.05, 0, 300, 15)))
          # bucket空间可以设置成 75万，多个特征可以共享embedding
-         industry_id_level3_k_data['industry_id_level3_cr_trend_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].str.cat([tmp['cr_a_' + str(day_cnt) + 'd'],tmp['cr_b_' + str(day_cnt) + 'd'],tmp['cr_c_' + str(day_cnt) + 'd'],tmp['cr_d_' + str(day_cnt) + 'd']], sep='_')
+         industry_id_level3_k_data['industry_id_level3_cr_trend_' + str(day_cnt) + 'd'] = tmp['cr_' + str(day_cnt) + 'd'].str.cat([tmp['cr_a_' + str(day_cnt) + 'd'],tmp['cr_b_' + str(day_cnt) + 'd'],tmp['cr_c_' + str(day_cnt) + 'd'],tmp['cr_d_' + str(day_cnt) + 'd']], sep='_').apply(lambda x: self.tools.hash_bucket(x, 750000))
          for day_cnt_new in range(4):
-            industry_id_level3_k_data = industry_id_level3_k_data.groupby(level=0).apply(lambda x: self._object_rolling(x, 'industry_id_level3_cr_trend_' + str(day_cnt) + 'd', 'industry_id_level3_cr_trend_' + str(day_cnt) + 'd' + '_' + str(day_cnt_new), day_cnt_new+2, 0))
+            industry_id_level3_k_data['industry_id_level3_cr_trend_' + str(day_cnt) + 'd' + '_' + str(day_cnt_new)] = industry_id_level3_k_data['industry_id_level3_cr_trend_' + str(day_cnt) + 'd'].groupby(level=0).apply(lambda x: x.rolling(min_periods=day_cnt_new+2, window=day_cnt_new+2, center=False).apply(lambda y: y[0]))
 
       # rsi指标
       tmp = industry_id_level3_k_data[["industry_id_level3_close", "industry_id_level3_preclose"]]
@@ -1063,10 +1061,10 @@ class Feature(object):
       gc.collect()
       return feature_all
 if __name__ == '__main__':
-   years = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022]
+   years = [2008, 2009, 2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022]
    is_predict = False
    date = '2022-11-17'
-   # years = [2008]
+   # years = [2008, 2009]
    # time.sleep(18000)
    for year in years:
       path = 'E:/pythonProject/future/data/datafile/raw_feature/code_k_data_v5_'

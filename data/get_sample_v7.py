@@ -54,7 +54,7 @@ class Sample(object):
 		feature['date'] = feature['date'].map(lambda x: int(x.replace('-', '')))
 		# if self.year == 2008:
 		# 	feature['date'] = pd.to_datetime(feature["date"], errors='coerce')
-		sample = pd.merge(feature, label, how="right", left_on=['code', "date"],right_on=['code', 'date'])
+		sample = pd.merge(feature, label, how="inner", left_on=['code', "date"],right_on=['code', 'date'])
 		if self.year == 2010:
 			sample = sample[sample['code_market'] != 3]
 		del feature
@@ -63,11 +63,11 @@ class Sample(object):
 		sample = sample.sort_values(by=['date', 'code'], ascending=True).round(5)
 		sample.to_csv('{output_dir}/sample/{model_name}/train_sample_{year}.csv'.format(output_dir=self.output_dir, model_name=self.model_name, year=str(self.year)), mode='a',header=True, index=False, encoding='utf-8')
 if __name__ == '__main__':
-	# time.sleep(25200)
+	time.sleep(28800)
 	base_path = 'E:/pythonProject/future/data/datafile'
 	model_name = 'model_v7'
-	years = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022]
-	# years = [2009]
+	years = [2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022]
+	# years = [2008,2009]
 	for year in years:
 		sample = Sample(year, base_path, model_name)
 		sample.get_sample()
