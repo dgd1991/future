@@ -1061,7 +1061,7 @@ class Feature(object):
       gc.collect()
       return feature_all
 if __name__ == '__main__':
-   years = [2008, 2009, 2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022]
+   years = [2019,2020,2021,2022]
    is_predict = False
    date = '2022-11-17'
    # years = [2008, 2009]
