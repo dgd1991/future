@@ -33,19 +33,19 @@ class Sample(object):
 		label.dropna(axis=0, inplace=True)
 		label['label_7'] = label['pctChg_7'] - label['zs_pctChg_7'] - 0.075
 		label['label_7_real'] = label['pctChg_7'] - label['zs_pctChg_7']
-		label['label_7_weight'] = label['label_7'].map(lambda x: min(abs(x*100), 2.5)*1.0/2.5)
+		label['label_7_weight'] = label['label_7'].map(lambda x: min(abs(x*100), 7.5)*1.0/7.5)
 		label['label_7'] = label['label_7'].map(lambda x: 1 if x>0 else 0)
 		label['label_7_max'] = label['pctChg_7_max'] - label['zs_pctChg_7_max'] - 0.075
 		label['label_7_max_real'] = label['pctChg_7_max'] - label['zs_pctChg_7_max']
-		label['label_7_max_weight'] = label['label_7_max'].map(lambda x: min(abs(x*100), 2.5)*1.0/2.5)
+		label['label_7_max_weight'] = label['label_7_max'].map(lambda x: min(abs(x*100), 7.5)*1.0/7.5)
 		label['label_7_max'] = label['label_7_max'].map(lambda x: 1 if x>0 else 0)
 		label['label_15'] = label['pctChg_15'] - label['zs_pctChg_15'] - 0.1
 		label['label_15_real'] = label['pctChg_15'] - label['zs_pctChg_15']
-		label['label_15_weight'] = label['label_15'].map(lambda x: min(abs(x*100), 5)*1.0/5)
+		label['label_15_weight'] = label['label_15'].map(lambda x: min(abs(x*100), 10)*1.0/10)
 		label['label_15'] = label['label_15'].map(lambda x: 1 if x>0 else 0)
 		label['label_15_max'] = label['pctChg_15_max'] - label['zs_pctChg_15_max'] - 0.1
 		label['label_15_max_real'] = label['pctChg_15_max'] - label['zs_pctChg_15_max']
-		label['label_15_max_weight'] = label['label_15_max'].map(lambda x: min(abs(x*100), 5)*1.0/5)
+		label['label_15_max_weight'] = label['label_15_max'].map(lambda x: min(abs(x*100), 10)*1.0/10)
 		label['label_15_max'] = label['label_15_max'].map(lambda x: 1 if x>0 else 0)
 
 		label = label[['code','date','label_7','label_7_real','label_7_weight','label_7_max','label_7_max_real','label_7_max_weight','label_15','label_15_real','label_15_weight','label_15_max','label_15_max_real','label_15_max_weight']]
@@ -63,10 +63,10 @@ class Sample(object):
 		sample = sample.sort_values(by=['date', 'code'], ascending=True).round(5)
 		sample.to_csv('{output_dir}/sample/{model_name}/train_sample_{year}.csv'.format(output_dir=self.output_dir, model_name=self.model_name, year=str(self.year)), mode='w',header=True, index=False, encoding='utf-8')
 if __name__ == '__main__':
-	time.sleep(3600)
+	time.sleep(7200)
 	base_path = 'E:/pythonProject/future/data/datafile'
-	model_name = 'model_v7'
-	years = [2022]
+	model_name = 'model_v8'
+	years = [2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022]
 	# years = [2008,2009]
 	for year in years:
 		sample = Sample(year, base_path, model_name)

@@ -23,18 +23,10 @@
 #
 # print(train_data_raw['industry_id_level1_open'])
 
-import pandas as pd
-path = 'E:/pythonProject/future/data/datafile/raw_feature/code_k_data_v5_2021.csv'
-raw_k_data = pd.read_csv(path)
-# raw_k_data['date'] = pd.to_datetime(raw_k_data['date'])
-raw_k_data=raw_k_data[raw_k_data['date']=='2021-01-07']
-
-raw_k_data = raw_k_data[raw_k_data['industry_id_level3'] > 0]
-raw_k_data["pctChg"] = pd.to_numeric(raw_k_data["pctChg"], errors='coerce')
-raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] <= 20) & (
-			raw_k_data['pctChg'] >= -20)]
-raw_k_data.to_csv('E:/pythonProject/future/data/datafile/raw_feature/test_code_k_data_v5_2021.csv', mode='a', header=True, index=False, encoding='utf-8')
-raw_k_data['date'] = pd.to_datetime(raw_k_data['date'])
-raw_k_data['pctChg'] = raw_k_data['pctChg'].map(lambda x: x / 100.0)
-print(raw_k_data[['date', 'pctChg', 'turn']].groupby('date').mean())
-
+import tensorflow as tf
+a = [0,1,0,1]
+b=[1,0,1,0]
+c = tf.where(tf.less(a, 1), a, b)
+with tf.Session() as sess:
+	result = sess.run(c)
+	print(result)

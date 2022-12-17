@@ -13,7 +13,7 @@ from tensorflow.python.training import queue_runner_impl
 from tensorflow.core.util.event_pb2 import SessionLog
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 class DeepFM(object):
-    def __init__(self, year, train_stype, model_name, saved_model, evaluate_feature='', is_shuffle=True):
+    def __init__(self, year, train_stype, model_name, saved_model, evaluate_feature=''):
         # for index in range(10):
         #     self.train_data.append('E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(
         #         model_name=model_name, year=str(index + 2008)))
@@ -24,10 +24,7 @@ class DeepFM(object):
 
         self.evaluate_feature = evaluate_feature
         self.task_type = train_stype
-        if is_shuffle:
-            self.train_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
-        else:
-            self.train_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}_all.csv'.format(model_name=model_name, year=str(year))
+        self.train_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
         self.test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(self.year_test))
         # if self.task_type == 'evaluate':
         #     self.test_data = 'E:/pythonProject/future/data/datafile/sample/{model_name}/eval_sample_{year}.csv'.format(model_name=model_name, year=str(self.year_test))
@@ -212,6 +209,7 @@ class DeepFM(object):
 
     def dnn(self, net):
         for idx, units in enumerate(self.dnn_dims):
+            net = tf.layers.dropout(net, 0.5, training=True)
             net = tf.layers.dense(net, units=units, activation=tf.nn.relu, name='dnn_' + str(idx))
             net = tf.layers.batch_normalization(inputs=net, name='concat_bn' + str(idx), reuse=tf.AUTO_REUSE)
         # net = tf.layers.dense(net, units=1)
@@ -438,33 +436,32 @@ def main():
 if __name__ == "__main__":
     # rm -r E:/pythonProject/future/saved_model/*
     # main()
-    # tf.test.is_gpu_available()uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu
+    # tf.test.is_gpu_available()
     # years = [2011, 2012, 2013, 2014]
     # for year in years:
     #     model = DeepFM(year, 'train', 'model_v2')
     #     model.run()
 
-    years = [2019]
+    years = [2008,2009,2010,2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021]
     # time.sleep(25000)
     # years = [2018, 2019, 2020, 2021]
     # years = [2021]
-
+    # time.sleep(5000)
     model_name = 'model_v7'
-    saved_model_name = 'saved_model_v7'
-    is_shuffle = True
-    epoch = 1
+    saved_model_name = 'saved_model_v74'
+    epoch = 3
     for year in years:
         for epo in range(epoch):
-            # train_data_path_raw = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
-            # train_data_path_raw_last = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year-1))
-            # train_data_path = 'E:/pythonProject/future/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
-            # if not os.path.isfile(train_data_path):
-            #     train_data_raw = pd.read_csv(train_data_path_raw).sample(frac=1).round(5)
-            #     # os.remove(train_data_path)
-            #     train_data_raw.to_csv(train_data_path, mode='w', header=True, index=False, encoding='utf-8')
-            #     del train_data_raw
-            #     gc.collect()
-            model = DeepFM(year, 'evaluate', model_name, saved_model_name, evaluate_feature='', is_shuffle=is_shuffle)
+            train_data_path_raw = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+            train_data_path_raw_last = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year-1))
+            train_data_path = 'E:/pythonProject/future/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+            if not os.path.isfile(train_data_path):
+                train_data_raw = pd.read_csv(train_data_path_raw).sample(frac=1).round(5)
+                # os.remove(train_data_path)
+                train_data_raw.to_csv(train_data_path, mode='w', header=True, index=False, encoding='utf-8')
+                del train_data_raw
+                gc.collect()
+            model = DeepFM(year, 'train', model_name, saved_model_name)
             model.lr = 0.0001
             model.run()
 

@@ -19,14 +19,15 @@ pd.set_option('display.width', 230)
 
 
 class Feature(object):
-   def __init__(self,  k_file_path, year, quarter_file_path, is_predict, date):
+   def __init__(self,  k_file_path, year, quarter_file_path, is_predict, date_start, date_end):
       self.k_file_path = k_file_path + str(year) + '.csv'
       self.k_file_path_his = k_file_path + str(year - 1) + '.csv'
       self.quarter_file_path = quarter_file_path
       self.year = year
       self.tools = Tools()
       self.is_predict = is_predict
-      self.date = date
+      self.date_start = date_start
+      self.date_end = date_end
 
    def _rolling(self, _df, index_col, value_col, output_col, window_size):
       l1 = _df[index_col].tolist()
@@ -70,6 +71,8 @@ class Feature(object):
    def feature_process(self):
       raw_k_data = pd.read_csv(self.k_file_path)
       raw_k_data_his = pd.read_csv(self.k_file_path_his)
+      if is_predict:
+         raw_k_data_his = raw_k_data_his[raw_k_data_his['date']>self.tools.get_recent_month_date(self.date_start, -14)]
       raw_k_data = pd.concat([raw_k_data_his, raw_k_data], axis=0)
       raw_k_data = raw_k_data[(raw_k_data['industry_id_level3'] > 0) | (raw_k_data['code'] == 'sh.000001') | (raw_k_data['code'] == 'sz.399001') | (raw_k_data['code'] == 'sz.399006')]
       del raw_k_data_his
@@ -267,13 +270,15 @@ class Feature(object):
       feature_all = feature_all.sort_values(['date', 'code'])
       feature_all = feature_all[feature_all['date'] > str(self.year)]
       if is_predict:
-         feature_all = feature_all[feature_all['date'] == self.date]
+         feature_all = feature_all[(feature_all['date'] >= self.date_start) & (feature_all['date'] <= self.date_end)]
       del tmp
       del raw_k_data
 
       # 一级行业特征
       raw_k_data = pd.read_csv(self.k_file_path)
       raw_k_data_his = pd.read_csv(self.k_file_path_his)
+      if is_predict:
+         raw_k_data_his = raw_k_data_his[raw_k_data_his['date']>self.tools.get_recent_month_date(self.date_start, -14)]
       raw_k_data = pd.concat([raw_k_data_his, raw_k_data], axis=0)
       raw_k_data = raw_k_data[raw_k_data['industry_id_level3']>0]
       del raw_k_data_his
@@ -515,6 +520,8 @@ class Feature(object):
       # 二级行业特征
       raw_k_data = pd.read_csv(self.k_file_path)
       raw_k_data_his = pd.read_csv(self.k_file_path_his)
+      if is_predict:
+         raw_k_data_his = raw_k_data_his[raw_k_data_his['date']>self.tools.get_recent_month_date(self.date_start, -14)]
       raw_k_data = pd.concat([raw_k_data_his, raw_k_data], axis=0)
       raw_k_data = raw_k_data[raw_k_data['industry_id_level3']>0]
       del raw_k_data_his
@@ -757,6 +764,8 @@ class Feature(object):
       # 三级行业特征
       raw_k_data = pd.read_csv(self.k_file_path)
       raw_k_data_his = pd.read_csv(self.k_file_path_his)
+      if is_predict:
+         raw_k_data_his = raw_k_data_his[raw_k_data_his['date']>self.tools.get_recent_month_date(self.date_start, -14)]
       raw_k_data = pd.concat([raw_k_data_his, raw_k_data], axis=0)
       raw_k_data = raw_k_data[raw_k_data['industry_id_level3']>0]
       del raw_k_data_his
@@ -999,6 +1008,8 @@ class Feature(object):
       # 大盘趋势类特征
       raw_k_data = pd.read_csv(self.k_file_path)
       raw_k_data_his = pd.read_csv(self.k_file_path_his)
+      if is_predict:
+         raw_k_data_his = raw_k_data_his[raw_k_data_his['date']>self.tools.get_recent_month_date(self.date_start, -14)]
       raw_k_data = pd.concat([raw_k_data_his, raw_k_data], axis=0)
       raw_k_data = raw_k_data[raw_k_data['industry_id_level3'] > 0]
       del raw_k_data_his
@@ -1061,9 +1072,10 @@ class Feature(object):
       gc.collect()
       return feature_all
 if __name__ == '__main__':
-   years = [2019,2020,2021,2022]
-   is_predict = False
-   date = '2022-11-17'
+   years = [2022]
+   is_predict = True
+   date_start = '2022-11-26'
+   date_end = '2022-12-16'
    # years = [2008, 2009]
    # time.sleep(18000)
    for year in years:
@@ -1072,11 +1084,11 @@ if __name__ == '__main__':
       output_path = 'E:/pythonProject/future/data/datafile/feature/{year}_feature_v7.csv'.format(year=str(year))
       # raw_k_data = pd.read_csv(path + str(year) + '.csv')
       # raw_k_data.to_csv('E:/pythonProject/future/data/datafile/raw_feature/test_code_k_data_v5_' + str(year) + '.csv', mode='a', header=True, index=False)
-      feature = Feature(path, year, quater_path, is_predict, date)
+      feature = Feature(path, year, quater_path, is_predict, date_start, date_end)
       feature_all = feature.feature_process()
       if os.path.isfile(output_path):
          feature_all.to_csv(output_path, mode='a', header=False, index=False)
       else:
-         feature_all.to_csv(output_path, mode='a', header=True, index=False)
+         feature_all.to_csv(output_path, mode='w', header=True, index=False)
       del feature_all
       gc.collect()

@@ -18,7 +18,7 @@ import logging
 from logging import handlers
 import pandas as pd
 import numpy as np
-industry_dict = np.load('E:/pythonProject/stock/common/industry_dict.npy').item()
+# industry_dict = np.load('E:/pythonProject/stock/common/industry_dict.npy').item()
 
 class Logger(object):
     level_relations = {
@@ -173,7 +173,7 @@ def main():
     # pw2.daemon = True
     pw1.start()
     # pw2.start()
-    for year in ['2022-11-18']:
+    for year in ['2022-12-12']:
         q.put(year)
     try:
         q.join()

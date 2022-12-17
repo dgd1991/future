@@ -109,7 +109,7 @@ class Label(object):
 
 if __name__ == '__main__':
 	path = 'E:/pythonProject/future/data/datafile/raw_feature/code_k_data_v4_'
-	year = 2007
+	year = 2022
 	last_year = 2022
 	Label = Label(path + str(year) + '.csv', path + str(year + 1) + '.csv', year, last_year)
 	years = [2022]

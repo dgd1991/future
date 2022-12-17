@@ -1,5 +1,8 @@
+import datetime
 import hashlib
 import math
+from calendar import calendar
+
 import numpy as np
 import pandas as pd
 
@@ -108,6 +111,19 @@ class Tools(object):
         int_num = int(hash_code, 16)
         index = int_num % bucket_size
         return index
+    def get_recent_month_date(self, date, months):
+        date_list = date.split('-')
+        year = date_list[0]
+        month = date_list[1]
+        day = date_list[2]
+
+        dt = datetime.date(int(year), int(month), int(day))
+        month = dt.month - 1 + months
+        year = dt.year + month // 12
+        month = month % 12 + 1
+        day = 1
+        return str(dt.replace(year=year, month=month, day=day))
+
 if __name__ == "__main__":
     tools = Tools()
     # industry_dic = tools.get_industry_dictionary()
@@ -117,3 +133,4 @@ if __name__ == "__main__":
     # tools.dictionary_load_path = 'E:/pythonProject/future/dictionary/sw_industry_dic.npy'
     # dictionary = tools.dictionary_load()
     # print(dictionary)
+    # print(tools.get_recent_month_date('2022-12-12', -9))
