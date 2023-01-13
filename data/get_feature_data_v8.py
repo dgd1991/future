@@ -82,7 +82,7 @@ class Feature(object):
       raw_k_data["turn"] = pd.to_numeric(raw_k_data["turn"], errors='coerce')
       raw_k_data["pctChg"] = pd.to_numeric(raw_k_data["pctChg"], errors='coerce')
 
-      raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] <= 20) & (raw_k_data['pctChg'] >= -20)]
+      raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] < 21) & (raw_k_data['pctChg'] > -21)]
 
       raw_k_data = raw_k_data.groupby('code').apply(lambda x: x.set_index('date'))
       raw_k_data['is_new'] = raw_k_data["pctChg"].groupby(level=0).apply(lambda x: x.rolling(min_periods=20, window=20, center=False).apply(lambda y: y[0]))
@@ -266,6 +266,50 @@ class Feature(object):
          feature_all['max_closs_turn' + str(day_cnt) + 'd'] = (raw_k_data['max_closs_turn' + str(day_cnt) + 'd']/raw_k_data['turn']).map(lambda x: float2Bucket(float(x), 10, 0, 20, 200))
          feature_all['min_closs_turn' + str(day_cnt) + 'd'] = (raw_k_data['min_closs_turn' + str(day_cnt) + 'd']/raw_k_data['turn']).map(lambda x: float2Bucket(float(x), 10, 0, 20, 200))
 
+      # 新增过去n天每个涨幅段的天数比例，换手率的比例,涨停的天数,主要捕捉股性特征，判断股票是否活跃
+      tmp = raw_k_data[['pctChg', 'turn', 'close', 'high', 'low', 'isST']]
+      tmp['pctChg_limit'] = tmp.apply(lambda x: self.tools.code_pctChg_limit_type(x.pctChg, x.isST, x.high, x.low, x.close), axis=1)
+      tmp['pctChg_up_limit'] = tmp['pctChg_limit'].map(lambda x: 1 if x == 1 else 0)
+      tmp['pctChg_down_limit'] = tmp['pctChg_limit'].map(lambda x: 1 if x == 2 else 0)
+      tmp['pctChg_greater_3'] = tmp['pctChg'].map(lambda x: 1 if x > 0.03 else 0)
+      tmp['pctChg_greater_6'] = tmp['pctChg'].map(lambda x: 1 if x > 0.06 else 0)
+      tmp['pctChg_greater_9'] = tmp['pctChg'].map(lambda x: 1 if x > 0.09 else 0)
+      tmp['pctChg_greater_13'] = tmp['pctChg'].map(lambda x: 1 if x > 0.13 else 0)
+
+      tmp['pctChg_less_3'] = tmp['pctChg'].map(lambda x: 1 if x < -0.03 else 0)
+      tmp['pctChg_less_6'] = tmp['pctChg'].map(lambda x: 1 if x < -0.06 else 0)
+      tmp['pctChg_less_9'] = tmp['pctChg'].map(lambda x: 1 if x < -0.09 else 0)
+      tmp['pctChg_less_13'] = tmp['pctChg'].map(lambda x: 1 if x < -0.13 else 0)
+
+      tmp['turn_greater_3'] = tmp['turn'].map(lambda x: 1 if x > 3 else 0)
+      tmp['turn_greater_6'] = tmp['turn'].map(lambda x: 1 if x > 6 else 0)
+      tmp['turn_greater_10'] = tmp['turn'].map(lambda x: 1 if x > 10 else 0)
+      tmp['turn_greater_15'] = tmp['turn'].map(lambda x: 1 if x > 15 else 0)
+      tmp['turn_greater_21'] = tmp['turn'].map(lambda x: 1 if x > 21 else 0)
+
+      for day_cnt in [3, 5, 10, 20, 30, 60, 120]:
+         feature_all['pctChg_up_limit_' + str(day_cnt) + 'd'] = tmp['pctChg_up_limit'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+         feature_all['pctChg_down_limit_' + str(day_cnt) + 'd'] = tmp['pctChg_down_limit'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+
+         feature_all['pctChg_greater_3_' + str(day_cnt) + 'd'] = tmp['pctChg_greater_3'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+         feature_all['pctChg_greater_6_' + str(day_cnt) + 'd'] = tmp['pctChg_greater_6'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+         feature_all['pctChg_greater_9_' + str(day_cnt) + 'd'] = tmp['pctChg_greater_9'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+         feature_all['pctChg_greater_13_' + str(day_cnt) + 'd'] = tmp['pctChg_greater_13'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+
+         feature_all['pctChg_less_3_' + str(day_cnt) + 'd'] = tmp['pctChg_less_3'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+         feature_all['pctChg_less_6_' + str(day_cnt) + 'd'] = tmp['pctChg_less_6'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+         feature_all['pctChg_less_9_' + str(day_cnt) + 'd'] = tmp['pctChg_less_9'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+         feature_all['pctChg_less_13_' + str(day_cnt) + 'd'] = tmp['pctChg_less_13'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+
+         feature_all['turn_greater_3_' + str(day_cnt) + 'd'] = tmp['turn_greater_3'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+         feature_all['turn_greater_6_' + str(day_cnt) + 'd'] = tmp['turn_greater_6'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+         feature_all['turn_greater_10_' + str(day_cnt) + 'd'] = tmp['turn_greater_10'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+         feature_all['turn_greater_15_' + str(day_cnt) + 'd'] = tmp['turn_greater_15'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+         feature_all['turn_greater_21_' + str(day_cnt) + 'd'] = tmp['turn_greater_21'].groupby(level=0).apply(lambda x: x.rolling(min_periods=3, window=day_cnt, center=False).mean())
+
+
+      # 新增过去n天涨幅超过大盘，行业指数m个点的天数
+      # 新增板块的最近n天的涨停股票数量，主要评估板块热度
       feature_all = feature_all.reset_index(level=0, drop=False)
       feature_all = feature_all.reset_index(level=0, drop=False)
       feature_all = feature_all.sort_values(['date', 'code'])
@@ -288,7 +332,7 @@ class Feature(object):
       raw_k_data["turn"] = pd.to_numeric(raw_k_data["turn"], errors='coerce')
       raw_k_data["pctChg"] = pd.to_numeric(raw_k_data["pctChg"], errors='coerce')
       # 需要去除上市当天的股票
-      raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] <= 20) & (raw_k_data['pctChg'] >= -20)]
+      raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] < 21) & (raw_k_data['pctChg'] > -21)]
       raw_k_data = raw_k_data.groupby('code').apply(lambda x: x.set_index('date'))
       raw_k_data['is_new'] = raw_k_data["pctChg"].groupby(level=0).apply(lambda x: x.rolling(min_periods=20, window=20, center=False).apply(lambda y: y[0]))
       raw_k_data = raw_k_data[raw_k_data['is_new'].map(lambda x: False if np.isnan(x) else True)]
@@ -330,8 +374,14 @@ class Feature(object):
       raw_k_data["pbMRQ"] = raw_k_data["pbMRQ"]*raw_k_data['market_value_ratio']
       raw_k_data["industry_id_level1_rise_ratio"] = raw_k_data["industry_id_level1_rise_ratio"]*raw_k_data['market_value_ratio']
 
-      industry_id_level1_k_data = raw_k_data[["industry_id_level1","open_ratio","close_ratio","high_ratio","low_ratio","turn","date","pctChg","peTTM","pcfNcfTTM","pbMRQ", 'industry_id_level1_rise_ratio', 'market_value']].groupby(['industry_id_level1','date']).sum().round(5)
-      industry_id_level1_k_data.columns = ["industry_id_level1_open_ratio","industry_id_level1_close_ratio","industry_id_level1_high_ratio","industry_id_level1_low_ratio","industry_id_level1_turn","industry_id_level1_pctChg","industry_id_level1_peTTM","industry_id_level1_pcfNcfTTM","industry_id_level1_pbMRQ", 'industry_id_level1_rise_ratio', 'industry_id_level1_market_value']
+      # 新增板块的最近n天的涨停股票数量，主要评估板块热度
+      raw_k_data['pctChg_limit'] = raw_k_data[['pctChg', 'turn', 'close', 'high', 'low', 'isST']].apply(lambda x: self.tools.code_pctChg_limit_type(x.pctChg, x.isST, x.high, x.low, x.close), axis=1)
+      raw_k_data['pctChg_up_limit'] = raw_k_data['pctChg_limit'].map(lambda x: 1 if x == 1 else 0)
+      raw_k_data['pctChg_down_limit'] = raw_k_data['pctChg_limit'].map(lambda x: 1 if x == 2 else 0)
+
+      industry_id_level1_k_data = raw_k_data[["industry_id_level1","open_ratio","close_ratio","high_ratio","low_ratio","turn","date","pctChg","peTTM","pcfNcfTTM","pbMRQ", 'industry_id_level1_rise_ratio', 'market_value', 'pctChg_up_limit', 'pctChg_down_limit']].groupby(['industry_id_level1','date']).sum().round(5)
+      industry_id_level1_k_data.columns = ["industry_id_level1_open_ratio","industry_id_level1_close_ratio","industry_id_level1_high_ratio","industry_id_level1_low_ratio","industry_id_level1_turn","industry_id_level1_pctChg","industry_id_level1_peTTM","industry_id_level1_pcfNcfTTM","industry_id_level1_pbMRQ", 'industry_id_level1_rise_ratio', 'industry_id_level1_market_value', 'industry_id_level1_pctChg_up_limit', 'industry_id_level1_pctChg_down_limit']
+
       del raw_k_data
       gc.collect()
       if os.path.isfile('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level1_' + str(year-1) + '.csv'):
@@ -354,6 +404,11 @@ class Feature(object):
       industry_id_level1_k_data['industry_id_level1_open'] = industry_id_level1_k_data['industry_id_level1_preclose']*(industry_id_level1_k_data['industry_id_level1_open_ratio'].apply(lambda x: x + 1)).round(5)
       industry_id_level1_k_data['industry_id_level1_high'] = industry_id_level1_k_data['industry_id_level1_preclose']*(industry_id_level1_k_data['industry_id_level1_high_ratio'].apply(lambda x: x + 1)).round(5)
       industry_id_level1_k_data['industry_id_level1_low'] = industry_id_level1_k_data['industry_id_level1_preclose']*(industry_id_level1_k_data['industry_id_level1_low_ratio'].apply(lambda x: x + 1)).round(5)
+
+      # 新增板块的最近n天的涨停股票数量，主要评估板块热度
+      for day_cnt in [3, 7, 15, 30]:
+         industry_id_level1_k_data['industry_id_level1_pctChg_up_limit_' + str(day_cnt)] = industry_id_level1_k_data['industry_id_level1_pctChg_up_limit'].groupby(level=0).apply(lambda x: x.rolling(min_periods=2, window=day_cnt, center=False).sum())
+         industry_id_level1_k_data['industry_id_level1_pctChg_down_limit_' + str(day_cnt)] = industry_id_level1_k_data['industry_id_level1_pctChg_down_limit'].groupby(level=0).apply(lambda x: x.rolling(min_periods=2, window=day_cnt, center=False).sum())
 
       # 写出指数点数
       industry_id_level1_k_data_out = industry_id_level1_k_data[['industry_id_level1_open', 'industry_id_level1_close', 'industry_id_level1_high', 'industry_id_level1_low']]
@@ -531,7 +586,7 @@ class Feature(object):
       raw_k_data["turn"] = pd.to_numeric(raw_k_data["turn"], errors='coerce')
       raw_k_data["pctChg"] = pd.to_numeric(raw_k_data["pctChg"], errors='coerce')
       # 需要去除上市当天的股票
-      raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] <= 20) & (raw_k_data['pctChg'] >= -20)]
+      raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] < 21) & (raw_k_data['pctChg'] > -21)]
       raw_k_data = raw_k_data.groupby('code').apply(lambda x: x.set_index('date'))
       raw_k_data['is_new'] = raw_k_data["pctChg"].groupby(level=0).apply(lambda x: x.rolling(min_periods=20, window=20, center=False).apply(lambda y: y[0]))
       raw_k_data = raw_k_data[raw_k_data['is_new'].map(lambda x: False if np.isnan(x) else True)]
@@ -573,8 +628,13 @@ class Feature(object):
       raw_k_data["pbMRQ"] = raw_k_data["pbMRQ"]*raw_k_data['market_value_ratio']
       raw_k_data["industry_id_level2_rise_ratio"] = raw_k_data["industry_id_level2_rise_ratio"]*raw_k_data['market_value_ratio']
 
-      industry_id_level2_k_data = raw_k_data[["industry_id_level2","open_ratio","close_ratio","high_ratio","low_ratio","turn","date","pctChg","peTTM","pcfNcfTTM","pbMRQ", 'industry_id_level2_rise_ratio', 'market_value']].groupby(['industry_id_level2','date']).sum().round(5)
-      industry_id_level2_k_data.columns = ["industry_id_level2_open_ratio","industry_id_level2_close_ratio","industry_id_level2_high_ratio","industry_id_level2_low_ratio","industry_id_level2_turn","industry_id_level2_pctChg","industry_id_level2_peTTM","industry_id_level2_pcfNcfTTM","industry_id_level2_pbMRQ", 'industry_id_level2_rise_ratio', 'industry_id_level2_market_value']
+      # 新增板块的最近n天的涨停股票数量，主要评估板块热度
+      raw_k_data['pctChg_limit'] = raw_k_data[['pctChg', 'turn', 'close', 'high', 'low', 'isST']].apply(lambda x: self.tools.code_pctChg_limit_type(x.pctChg, x.isST, x.high, x.low, x.close), axis=1)
+      raw_k_data['pctChg_up_limit'] = raw_k_data['pctChg_limit'].map(lambda x: 1 if x == 1 else 0)
+      raw_k_data['pctChg_down_limit'] = raw_k_data['pctChg_limit'].map(lambda x: 1 if x == 2 else 0)
+
+      industry_id_level2_k_data = raw_k_data[["industry_id_level2","open_ratio","close_ratio","high_ratio","low_ratio","turn","date","pctChg","peTTM","pcfNcfTTM","pbMRQ", 'industry_id_level2_rise_ratio', 'market_value','pctChg_up_limit','pctChg_down_limit']].groupby(['industry_id_level2','date']).sum().round(5)
+      industry_id_level2_k_data.columns = ["industry_id_level2_open_ratio","industry_id_level2_close_ratio","industry_id_level2_high_ratio","industry_id_level2_low_ratio","industry_id_level2_turn","industry_id_level2_pctChg","industry_id_level2_peTTM","industry_id_level2_pcfNcfTTM","industry_id_level2_pbMRQ", 'industry_id_level2_rise_ratio', 'industry_id_level2_market_value','industry_id_level2_pctChg_up_limit','industry_id_level2_pctChg_down_limit']
       del raw_k_data
       gc.collect()
       if os.path.isfile('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level2_' + str(year-1) + '.csv'):
@@ -597,6 +657,11 @@ class Feature(object):
       industry_id_level2_k_data['industry_id_level2_open'] = industry_id_level2_k_data['industry_id_level2_preclose']*(industry_id_level2_k_data['industry_id_level2_open_ratio'].apply(lambda x: x + 1)).round(5)
       industry_id_level2_k_data['industry_id_level2_high'] = industry_id_level2_k_data['industry_id_level2_preclose']*(industry_id_level2_k_data['industry_id_level2_high_ratio'].apply(lambda x: x + 1)).round(5)
       industry_id_level2_k_data['industry_id_level2_low'] = industry_id_level2_k_data['industry_id_level2_preclose']*(industry_id_level2_k_data['industry_id_level2_low_ratio'].apply(lambda x: x + 1)).round(5)
+
+     # 新增板块的最近n天的涨停股票数量，主要评估板块热度
+      for day_cnt in [3, 7, 15, 30]:
+         industry_id_level2_k_data['industry_id_level2_pctChg_up_limit_' + str(day_cnt)] = industry_id_level2_k_data['industry_id_level2_pctChg_up_limit'].groupby(level=0).apply(lambda x: x.rolling(min_periods=2, window=day_cnt, center=False).sum())
+         industry_id_level2_k_data['industry_id_level2_pctChg_down_limit_' + str(day_cnt)] = industry_id_level2_k_data['industry_id_level2_pctChg_down_limit'].groupby(level=0).apply(lambda x: x.rolling(min_periods=2, window=day_cnt, center=False).sum())
 
       # 写出指数点数
       industry_id_level2_k_data_out = industry_id_level2_k_data[['industry_id_level2_open', 'industry_id_level2_close', 'industry_id_level2_high', 'industry_id_level2_low']]
@@ -775,7 +840,7 @@ class Feature(object):
       raw_k_data["turn"] = pd.to_numeric(raw_k_data["turn"], errors='coerce')
       raw_k_data["pctChg"] = pd.to_numeric(raw_k_data["pctChg"], errors='coerce')
       # 需要去除上市当天的股票
-      raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] <= 20) & (raw_k_data['pctChg'] >= -20)]
+      raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] < 21) & (raw_k_data['pctChg'] > -21)]
       raw_k_data = raw_k_data.groupby('code').apply(lambda x: x.set_index('date'))
       raw_k_data['is_new'] = raw_k_data["pctChg"].groupby(level=0).apply(lambda x: x.rolling(min_periods=20, window=20, center=False).apply(lambda y: y[0]))
       raw_k_data = raw_k_data[raw_k_data['is_new'].map(lambda x: False if np.isnan(x) else True)]
@@ -817,8 +882,13 @@ class Feature(object):
       raw_k_data["pbMRQ"] = raw_k_data["pbMRQ"]*raw_k_data['market_value_ratio']
       raw_k_data["industry_id_level3_rise_ratio"] = raw_k_data["industry_id_level3_rise_ratio"]*raw_k_data['market_value_ratio']
 
-      industry_id_level3_k_data = raw_k_data[["industry_id_level3","open_ratio","close_ratio","high_ratio","low_ratio","turn","date","pctChg","peTTM","pcfNcfTTM","pbMRQ", 'industry_id_level3_rise_ratio', 'market_value']].groupby(['industry_id_level3','date']).sum().round(5)
-      industry_id_level3_k_data.columns = ["industry_id_level3_open_ratio","industry_id_level3_close_ratio","industry_id_level3_high_ratio","industry_id_level3_low_ratio","industry_id_level3_turn","industry_id_level3_pctChg","industry_id_level3_peTTM","industry_id_level3_pcfNcfTTM","industry_id_level3_pbMRQ", 'industry_id_level3_rise_ratio', 'industry_id_level3_market_value']
+      # 新增板块的最近n天的涨停股票数量，主要评估板块热度
+      raw_k_data['pctChg_limit'] = raw_k_data[['pctChg', 'turn', 'close', 'high', 'low', 'isST']].apply(lambda x: self.tools.code_pctChg_limit_type(x.pctChg, x.isST, x.high, x.low, x.close), axis=1)
+      raw_k_data['pctChg_up_limit'] = raw_k_data['pctChg_limit'].map(lambda x: 1 if x == 1 else 0)
+      raw_k_data['pctChg_down_limit'] = raw_k_data['pctChg_limit'].map(lambda x: 1 if x == 2 else 0)
+
+      industry_id_level3_k_data = raw_k_data[["industry_id_level3","open_ratio","close_ratio","high_ratio","low_ratio","turn","date","pctChg","peTTM","pcfNcfTTM","pbMRQ", 'industry_id_level3_rise_ratio', 'market_value','pctChg_up_limit','pctChg_down_limit']].groupby(['industry_id_level3','date']).sum().round(5)
+      industry_id_level3_k_data.columns = ["industry_id_level3_open_ratio","industry_id_level3_close_ratio","industry_id_level3_high_ratio","industry_id_level3_low_ratio","industry_id_level3_turn","industry_id_level3_pctChg","industry_id_level3_peTTM","industry_id_level3_pcfNcfTTM","industry_id_level3_pbMRQ", 'industry_id_level3_rise_ratio', 'industry_id_level3_market_value','industry_id_level3_pctChg_up_limit','industry_id_level3_pctChg_down_limit']
       del raw_k_data
       gc.collect()
       if os.path.isfile('E:/pythonProject/future/data/datafile/industry/' + 'industry_id_level3_' + str(year-1) + '.csv'):
@@ -841,6 +911,11 @@ class Feature(object):
       industry_id_level3_k_data['industry_id_level3_open'] = industry_id_level3_k_data['industry_id_level3_preclose']*(industry_id_level3_k_data['industry_id_level3_open_ratio'].apply(lambda x: x + 1)).round(5)
       industry_id_level3_k_data['industry_id_level3_high'] = industry_id_level3_k_data['industry_id_level3_preclose']*(industry_id_level3_k_data['industry_id_level3_high_ratio'].apply(lambda x: x + 1)).round(5)
       industry_id_level3_k_data['industry_id_level3_low'] = industry_id_level3_k_data['industry_id_level3_preclose']*(industry_id_level3_k_data['industry_id_level3_low_ratio'].apply(lambda x: x + 1)).round(5)
+
+     # 新增板块的最近n天的涨停股票数量，主要评估板块热度
+      for day_cnt in [3, 7, 15, 30]:
+         industry_id_level3_k_data['industry_id_level3_pctChg_up_limit_' + str(day_cnt)] = industry_id_level3_k_data['industry_id_level3_pctChg_up_limit'].groupby(level=0).apply(lambda x: x.rolling(min_periods=2, window=day_cnt, center=False).sum())
+         industry_id_level3_k_data['industry_id_level3_pctChg_down_limit_' + str(day_cnt)] = industry_id_level3_k_data['industry_id_level3_pctChg_down_limit'].groupby(level=0).apply(lambda x: x.rolling(min_periods=2, window=day_cnt, center=False).sum())
 
       # 写出指数点数
       industry_id_level3_k_data_out = industry_id_level3_k_data[['industry_id_level3_open', 'industry_id_level3_close', 'industry_id_level3_high', 'industry_id_level3_low']]
@@ -1018,7 +1093,7 @@ class Feature(object):
       raw_k_data["tradestatus"] = pd.to_numeric(raw_k_data["tradestatus"], errors='coerce')
       raw_k_data["turn"] = pd.to_numeric(raw_k_data["turn"], errors='coerce')
       raw_k_data["pctChg"] = pd.to_numeric(raw_k_data["pctChg"], errors='coerce')
-      raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] <= 20) & (raw_k_data['pctChg'] >= -20)]
+      raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] < 21) & (raw_k_data['pctChg'] > -21)]
       raw_k_data = raw_k_data.groupby('code').apply(lambda x: x.set_index('date'))
       raw_k_data['is_new'] = raw_k_data["pctChg"].groupby(level=0).apply(lambda x: x.rolling(min_periods=20, window=20, center=False).apply(lambda y: y[0]))
       raw_k_data = raw_k_data[raw_k_data['is_new'].map(lambda x: False if np.isnan(x) else True)]
@@ -1094,8 +1169,8 @@ if __name__ == '__main__':
    years = [2023]
    is_predict = True
    model_name = 'model_v7'
-   date_start = '2023-01-13'
-   date_end = '2023-01-13'
+   date_start = '2023-01-06'
+   date_end = '2023-01-06'
    # years = [2008, 2009]
    # time.sleep(18000)
    for year in years:

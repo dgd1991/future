@@ -123,6 +123,23 @@ class Tools(object):
         month = month % 12 + 1
         day = 1
         return str(dt.replace(year=year, month=month, day=day))
+    def code_pctChg_limit_type(self, pctChg, is_st, high, low, close):
+        if high == close and high == low and pctChg>0.04:
+            return 1
+        if high == close and high == low and pctChg<-0.04:
+            return 2
+        if is_st == 1:
+            if high == close and pctChg>0.047 and pctChg<0.053:
+                return 1
+            elif low == close and pctChg>-0.053 and pctChg<-0.047:
+                return 2
+        if high == close and ((pctChg > 0.099 and pctChg < 0.101) or (pctChg > 0.199 and pctChg < 0.201)):
+            return 1
+        elif low == close and ((pctChg < -0.099 and pctChg > -0.101) or (pctChg < -0.199 and pctChg > -0.201)):
+            return 2
+        return 0
+
+
 
 if __name__ == "__main__":
     tools = Tools()
