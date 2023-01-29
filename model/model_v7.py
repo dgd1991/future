@@ -453,7 +453,7 @@ if __name__ == "__main__":
     #     model.run()
 
     years = [2023]
-    predict_date = '2023-01-13'
+    predict_date = '2023-01-20'
     # time.sleep(25000)
     # years = [2018, 2019, 2020, 2021]
     # years = [2021]

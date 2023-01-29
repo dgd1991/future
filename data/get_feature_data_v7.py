@@ -1094,8 +1094,8 @@ if __name__ == '__main__':
    years = [2023]
    is_predict = True
    model_name = 'model_v7'
-   date_start = '2023-01-13'
-   date_end = '2023-01-13'
+   date_start = '2023-01-20'
+   date_end = '2023-01-20'
    # years = [2008, 2009]
    # time.sleep(18000)
    for year in years:
