@@ -20,6 +20,7 @@ class Label(object):
 			code_k_data_path2 = pd.read_csv(self.path2)
 			code_k_data_both = pd.concat([code_k_data_path1, code_k_data_path2], axis=0)
 		code_k_data_both.drop_duplicates(inplace=True)
+		code_k_data_both = code_k_data_both[(code_k_data_both['industry_id_level3'] > 0) | (code_k_data_both['code'] == 'sh.000001') | (code_k_data_both['code'] == 'sz.399001') | (code_k_data_both['code'] == 'sz.399006')]
 		code_k_data_both["tradestatus"] = pd.to_numeric(code_k_data_both["tradestatus"], errors='coerce')
 		code_k_data_both["turn"] = pd.to_numeric(code_k_data_both["turn"], errors='coerce')
 		code_k_data_both["pctChg"] = pd.to_numeric(code_k_data_both["pctChg"], errors='coerce')
@@ -108,7 +109,7 @@ class Label(object):
 		return label
 
 if __name__ == '__main__':
-	path = 'E:/pythonProject/future/data/datafile/raw_feature/code_k_data_v4_'
+	path = 'E:/pythonProject/future/data/datafile/raw_feature/code_k_data_v5_'
 	year = 2022
 	last_year = 2022
 	Label = Label(path + str(year) + '.csv', path + str(year + 1) + '.csv', year, last_year)

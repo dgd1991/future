@@ -1090,12 +1090,12 @@ class Feature(object):
          sample.to_csv('E:/pythonProject/future/data/datafile/prediction_sample/{model_name}/prediction_sample_{date}.csv'.format(model_name=self.model_name, date=str(self.date_end)), mode='a',header=True, index=False, encoding='utf-8')
       return feature_all
 if __name__ == '__main__':
-   # time.sleep(18000)
+   # time.sleep(15000)
    years = [2023]
-   is_predict = True
+   is_predict = False
    model_name = 'model_v7'
-   date_start = '2023-01-20'
-   date_end = '2023-01-20'
+   date_start = '2023-02-06'
+   date_end = '2023-02-06'
    # years = [2008, 2009]
    # time.sleep(18000)
    for year in years:

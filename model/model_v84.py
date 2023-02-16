@@ -69,15 +69,12 @@ class DeepFM(object):
         self.fea_count = sum(self.select_col) - self.label_cnt
 
     def init_variable(self):
-        dnn_hidden_1 = 1500
-        dnn_hidden_2 = 1024
         dnn_hidden_3 = 700
         dnn_hidden_4 = 512
         dnn_hidden_5 = 256
-        dnn_hidden_6 = 128
-        dnn_hidden_7 = 64
 
-        dnn_dims = [dnn_hidden_1, dnn_hidden_2, dnn_hidden_3, dnn_hidden_4, dnn_hidden_5, dnn_hidden_6, dnn_hidden_7]
+
+        dnn_dims = [dnn_hidden_3, dnn_hidden_4, dnn_hidden_5]
         # dnn_dims = [dnn_hidden_1, dnn_hidden_2, dnn_hidden_3, dnn_hidden_4]
         return dnn_dims
 
@@ -244,7 +241,7 @@ class DeepFM(object):
             embed_input = tf.feature_column.input_layer(features, all_feas)
         with tf.device('/gpu:0'):
             dnn = self.dnn(embed_input)
-            cross = self.cross_layer(embed_input, 6)
+            cross = self.cross_layer(embed_input, 3)
             dcn = tf.concat([dnn, cross], axis=1)
             y_ctr = tf.layers.dense(dcn, units=1)
             # y_ctr = tf.layers.dense(dnn, units=1)
@@ -456,10 +453,10 @@ if __name__ == "__main__":
     # time.sleep(20000)
     # years = [2018, 2019, 2020, 2021]
     # years = [2021]
-    # 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020,
-    years = [2022]
+    years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020,2021,2022]
+    # years = [2022]
     model_name = 'model_v8'
-    saved_model_name = 'saved_model_v8'
+    saved_model_name = 'saved_model_v84'
     is_shuffle = True
     epoch = 1
     for year in years:
@@ -472,7 +469,7 @@ if __name__ == "__main__":
                 train_data_raw.to_csv(train_data_path, mode='w', header=True, index=False, encoding='utf-8')
                 del train_data_raw
                 gc.collect()
-            model = DeepFM(year, 'evaluate', model_name, saved_model_name, evaluate_feature='', is_shuffle=is_shuffle, date="")
+            model = DeepFM(year, 'train', model_name, saved_model_name, evaluate_feature='', is_shuffle=is_shuffle, date="")
             model.lr = 0.0001
             model.run()
 

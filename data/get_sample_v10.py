@@ -14,7 +14,7 @@ pd.set_option('display.width', 230)
 class Sample(object):
 	def __init__(self, year, base_path, model_name):
 		self.year = year
-		self.fea_path = base_path + '/feature/' + str(year) + '_feature_v8.csv'
+		self.fea_path = base_path + '/feature/' + str(year) + '_feature_v10.csv'
 		self.label_path = base_path + '/label/' + str(year) + '_raw_v4.csv'
 		self.year = year
 		self.output_dir = base_path
@@ -25,7 +25,7 @@ class Sample(object):
 			label['date'] = pd.to_numeric(label["date"], errors='coerce')
 			label = label[label['date']>20080702]
 		# label.dropna(axis=0, inplace=True)
-		label['zs_pctChg_7'] = label.apply(lambda x: x.cy_pctChg_7 if str(x.code).startswith('sz.300') else (x.sh_pctChg_7 if str(x.code).startswith('sh.60') else (x.sz_pctChg_7 if str(x.code).startswith('sz.000') else np.nan)), axis=1)
+		label['zs_pctChg_7'] = label.apply(lambda x: x.cy_pctChg_7 if str(x.code).startswith('sz.300') else (x.sh_pctChg_7 if (str(x.code).startswith('sh.60') or str(x.code).startswith('sh.68') or str(x.code).startswith('sh.689')) else (x.sz_pctChg_7 if str(x.code).startswith('sz.000') else np.nan)), axis=1)
 		label['zs_pctChg_15'] = label.apply(lambda x: x.cy_pctChg_15 if str(x.code).startswith('sz.300') else (x.sh_pctChg_15 if str(x.code).startswith('sh.60') else (x.sz_pctChg_15 if str(x.code).startswith('sz.000') else np.nan)), axis=1)
 		label = label[['code','date','pctChg_7','zs_pctChg_7','pctChg_15','zs_pctChg_15']]
 		label.dropna(axis=0, inplace=True)
@@ -66,8 +66,8 @@ class Sample(object):
 		sample.to_csv('{output_dir}/sample/{model_name}/train_sample_{year}.csv'.format(output_dir=self.output_dir, model_name=self.model_name, year=str(self.year)), mode='w',header=True, index=False, encoding='utf-8')
 if __name__ == '__main__':
 	base_path = 'E:/pythonProject/future/data/datafile'
-	model_name = 'model_v8'
-	years = [2022]
+	model_name = 'model_v9'
+	years = [2008,2009]
 	# years = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022]
 	for year in years:
 		sample = Sample(year, base_path, model_name)

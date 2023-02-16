@@ -19,7 +19,7 @@ class ModelEval(object):
 	def eval(self):
 		df = pd.read_csv('E:/pythonProject/future/data/datafile/prediction_result/{model_name}/prediction_result_{date}.csv'.format(model_name=self.model_name, date=str(self.date)), encoding='utf-8')
 
-		df.columns = ['date', 'code', 'industry_name_level1', 'industry_name_level2', 'industry_name_level3', 'predition', 'label_7', 'label_7_real', 'label_7_weight', 'label_7_max', 'label_7_max_real', 'label_7_max_weight', 'label_15', 'label_15_real', 'label_15_weight', 'label_15_max', 'label_15_max_real', 'label_15_max_weight']
+		df.columns = ['date', 'code', 'industry_name_level1', 'industry_name_level2', 'industry_name_level3', 'predition', 'label_7', 'label_7_real', 'label_7_weight', 'label_7_raw', 'label_7_raw_real', 'label_7_raw_weight', 'label_15', 'label_15_real', 'label_15_weight', 'label_15_raw', 'label_15_raw_real', 'label_15_raw_weight']
 		df['code'] = df['code'].map(lambda x: x.replace('b', '').replace("'", ''))
 		df = df[['date', 'code', 'predition']]
 		self.code_industry = pd.read_csv(self.sw_code_all_industry_path, encoding='utf-8')
@@ -56,9 +56,9 @@ class ModelEval(object):
 	# print('all_mean: ' + str(all_mean))
 if __name__ == "__main__":
 	# , 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019
-	dates = ["2023-02-03"]
+	dates = ["2023-02-16"]
 	# years = [2009, 2010]
-	model_name = 'saved_model_v7'
+	model_name = 'saved_model_v9'
 	result = []
 	for date in dates:
 		modelEval = ModelEval(date, model_name)

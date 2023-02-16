@@ -1153,24 +1153,23 @@ class Feature(object):
          sample['label_7'] = 0
          sample['label_7_real'] = 0
          sample['label_7_weight'] = 0
-         sample['label_7_max'] = 0
-         sample['label_7_max_real'] = 0
-         sample['label_7_max_weight'] = 0
+         sample['label_7_raw'] = 0
+         sample['label_7_raw_real'] = 0
+         sample['label_7_raw_weight'] = 0
          sample['label_15'] = 0
          sample['label_15_real'] = 0
          sample['label_15_weight'] = 0
-         sample['label_15_max'] = 0
-         sample['label_15_max_real'] = 0
-         sample['label_15_max_weight'] = 0
+         sample['label_15_raw'] = 0
+         sample['label_15_raw_real'] = 0
+         sample['label_15_raw_weight'] = 0
          sample.to_csv('E:/pythonProject/future/data/datafile/prediction_sample/{model_name}/prediction_sample_{date}.csv'.format(model_name=self.model_name, date=str(self.date_end)), mode='a',header=True, index=False, encoding='utf-8')
       return feature_all
 if __name__ == '__main__':
-   # time.sleep(18000)
-   years = [2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022]
-   is_predict = False
+   years = [2023]
+   is_predict = True
    model_name = 'model_v8'
-   date_start = '2008-01-06'
-   date_end = '2008-01-06'
+   date_start = '2023-02-10'
+   date_end = '2023-02-10'
    # years = [2008, 2009]
    # time.sleep(18000)
    for year in years:

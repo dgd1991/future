@@ -451,9 +451,8 @@ if __name__ == "__main__":
     # for year in years:
     #     model = DeepFM(year, 'train', 'model_v2')
     #     model.run()
-
     years = [2023]
-    predict_date = '2023-01-20'
+    predict_date = '2023-02-03'
     # time.sleep(25000)
     # years = [2018, 2019, 2020, 2021]
     # years = [2021]

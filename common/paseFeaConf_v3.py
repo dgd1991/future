@@ -68,7 +68,7 @@ def parse_feaconf(commonPath, modelName):
     return col_name, select_col, default_value_list, all_fea_config, feature_accuracy
 if __name__ == '__main__':
     confPath = "E:/pythonProject/future/common/"
-    modelName = "model_v77"
+    modelName = "model_v9"
     col_name, select_col, default_value_list, all_fea_config, feature_accuracy = parse_feaconf(confPath, modelName)
     with open(os.path.join(confPath, modelName + "_parsed"), "w") as fout:
         fout.write('self.col_name = ' + str(col_name))

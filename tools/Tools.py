@@ -73,16 +73,14 @@ class Tools(object):
             return 'unknow.' + code
 
     def code_market(self, code):
-        if code.startswith('sz.300'):
+        if code.startswith('sz.30'):
             return 3
         elif code.startswith('sh.60'):
             return 1
-        elif code.startswith('sz.000'):
+        elif code.startswith('sz.00'):
             return 2
-        elif code.startswith('sh.688'):
-            return 1
-        elif code.startswith('sh.689'):
-            return 1
+        elif code.startswith('sh.68'):
+            return 3
         else:
             return 0
 
