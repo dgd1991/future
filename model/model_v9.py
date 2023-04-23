@@ -349,9 +349,6 @@ class DeepFM(object):
 
             tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
 
-            # if self.is_chief:
-            #     print("......................Start savemodel......................")
-            #     classifier.export_savedmodel(self.output_dir, self.serving_input_receiver_fn, strip_default_attrs=True)
         elif self.task_type == 'evaluate':
             evaluate_result = classifier.evaluate(input_fn=lambda: self.train_input_fn_from_csv(data_path=self.test_data, epoch=1, batch_size=self.batch_size))
             print(evaluate_result)
@@ -455,7 +452,7 @@ if __name__ == "__main__":
     predict_date = '2023-02-16'
     years = [2023]
     # years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020,2021,2022]
-    # years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020,2021,2022]
+    years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020,2021,2022]
 
     # years = [2023]
     model_name = 'model_v9'
@@ -464,17 +461,17 @@ if __name__ == "__main__":
     epoch = 1
     for year in years:
         for epo in range(epoch):
-            # train_data_path_raw = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
-            # train_data_path_raw_last = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year-1))
-            # train_data_path = 'E:/pythonProject/future/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
-            # if not os.path.isfile(train_data_path):
-            #     train_data_raw = pd.read_csv(train_data_path_raw).sample(frac=1).round(5)
-            #     train_data_raw.to_csv(train_data_path, mode='w', header=True, index=False, encoding='utf-8')
-            #     del train_data_raw
-            #     gc.collect()
-            # model = DeepFM(year, 'evaluate', model_name, saved_model_name, evaluate_feature='', is_shuffle=is_shuffle, date="")
-            # model.lr = 0.0001
-            # model.run()
+            train_data_path_raw = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+            train_data_path_raw_last = 'E:/pythonProject/future/data/datafile/sample/{model_name}/train_sample_{year}.csv'.format(model_name=model_name, year=str(year-1))
+            train_data_path = 'E:/pythonProject/future/data/datafile/sample/{model_name}/shuffled_train_sample_{year}.csv'.format(model_name=model_name, year=str(year))
+            if not os.path.isfile(train_data_path):
+                train_data_raw = pd.read_csv(train_data_path_raw).sample(frac=1).round(5)
+                train_data_raw.to_csv(train_data_path, mode='w', header=True, index=False, encoding='utf-8')
+                del train_data_raw
+                gc.collect()
+            model = DeepFM(year, 'train', model_name, saved_model_name, evaluate_feature='', is_shuffle=is_shuffle, date="")
+            model.lr = 0.0001
+            model.run()
 
             model = DeepFM(year, 'predict', model_name, saved_model_name, evaluate_feature='', is_shuffle=is_shuffle, date=predict_date)
             if os.path.isfile(model.prediction_result):

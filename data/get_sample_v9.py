@@ -17,7 +17,7 @@ class Sample(object):
 	def __init__(self, year, base_path, model_name):
 		self.year = year
 		self.fea_path = base_path + '/feature/' + str(year) + '_feature_v9.csv'
-		self.label_path = base_path + '/label/' + str(year) + '_raw_v4.csv'
+		self.label_path = base_path + '/label/' + str(year) + '_raw_v5.csv'
 		self.year = year
 		self.output_dir = base_path
 		self.model_name = model_name
@@ -70,8 +70,8 @@ class Sample(object):
 if __name__ == '__main__':
 	base_path = 'E:/pythonProject/future/data/datafile'
 	model_name = 'model_v9'
-	years = [2008,2009]
-	# years = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022]
+	years = [2021, 2022]
+	# years = [2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022]
 	for year in years:
 		sample = Sample(year, base_path, model_name)
 		sample.get_sample()

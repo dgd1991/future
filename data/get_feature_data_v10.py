@@ -115,14 +115,15 @@ class Feature(object):
 
       # 新增每天大盘的数据指数数据
       tmp = raw_k_data[['date', 'code', 'close']]
-      tmp['date'] = tmp['date'].map(lambda x: int(x.replace('-', '')))
+      # tmp['date'] = tmp['date'].map(lambda x: int(x.replace('-', '')))
       code_k_data_sh = tmp[tmp['code'] == 'sh.000001'][['date', 'close']]
       code_k_data_sh.columns = ["date_new", "sh_close"]
       code_k_data_sz = tmp[tmp['code'] == 'sz.399001'][['date', 'close']]
       code_k_data_sz.columns = ["date_new", "sz_close"]
       code_k_data_cy = tmp[tmp['code'] == 'sz.399006'][['date', 'close']]
       code_k_data_cy.columns = ["date_new", "cy_close"]
-      raw_k_data['date_new'] = raw_k_data['date'].map(lambda x: int(x.replace('-', '')))
+      # raw_k_data['date_new'] = raw_k_data['date'].map(lambda x: int(x.replace('-', '')))
+      raw_k_data['date_new'] = raw_k_data['date']
       raw_k_data = pd.merge(raw_k_data, code_k_data_sh, how="left", left_on=['date_new'], right_on=['date_new'])
       raw_k_data = pd.merge(raw_k_data, code_k_data_sz, how="left", left_on=['date_new'], right_on=['date_new'])
       raw_k_data = pd.merge(raw_k_data, code_k_data_cy, how="left", left_on=['date_new'], right_on=['date_new'])
@@ -137,14 +138,14 @@ class Feature(object):
       feature_all['high_ratio_7d_avg'] = raw_k_data.groupby(level=0)['high_ratio'].apply(lambda x: x.rolling(min_periods=1, window=7, center=False).mean()).round(5)
       feature_all['low_ratio_7d_avg'] = raw_k_data.groupby(level=0)['low_ratio'].apply(lambda x: x.rolling(min_periods=1, window=7, center=False).mean()).round(5)
 
-      # feature_all['amount'] = raw_k_data['amount'].map(lambda x: None if x == '' else bignumber2Bucket(float(x) * 0.0000001, 1, 0))
-      feature_all['market_value'] = raw_k_data['market_value'].map(lambda x: None if x == '' else bignumber2Bucket(float(x), 1.25, 60))
+      # feature_all['amount'] = raw_k_data['amount'].map(lambda x: None if x == '' else bignumber2Bucket(float(x) * 0.0000001, 1.2, 0))
+      feature_all['market_value'] = raw_k_data['market_value'].map(lambda x: None if x == '' else bignumber2Bucket(float(x), 1.5, 30))
       # 一般市盈率10-30倍为好
-      feature_all['peTTM'] = raw_k_data['peTTM'].map(lambda x: float2Bucket(float(x) + 200, 0.5, 0, 400, 200))
+      feature_all['peTTM'] = raw_k_data['peTTM'].map(lambda x: bignumber2Bucket(float(x), 1.25, 50))
       # 市现率合适的范围是0-25之间
-      feature_all['pcfNcfTTM'] = raw_k_data['pcfNcfTTM'].map(lambda x: float2Bucket(float(x) + 200, 0.5, 0, 400, 200))
+      feature_all['pcfNcfTTM'] = raw_k_data['pcfNcfTTM'].map(lambda x: bignumber2Bucket(float(x), 1.25, 50))
       # 市净率一般在3 - 10之间是一个比较合理的范围
-      feature_all['pbMRQ'] = raw_k_data['pbMRQ'].map(lambda x: float2Bucket(float(x), 2, 0, 100, 200))
+      feature_all['pbMRQ'] = raw_k_data['pbMRQ'].map(lambda x: float2Bucket(float(x), 1, 0, 100, 100))
       feature_all['isST'] = raw_k_data['isST'].map(lambda x: float2Bucket(float(x), 1, 0, 3, 3))
       feature_all['turn'] = raw_k_data['turn'].map(lambda x: float2Bucket(float(x), 2, 0, 50, 100))
 
@@ -331,27 +332,28 @@ class Feature(object):
       tmp['amount'] = tmp['amount'] * 0.0000005
       # 当日换手率/最近10天（不包括当日）的最大换手率或者平均换手率
       # 当日收盘价格/最近10天（不包括当日）的最大收盘价或者平均收盘价格
-      tmp['max_turn'] = tmp['turn'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=10, center=False).apply(lambda y: max(y[0:9])))
-      tmp['avg_turn'] = tmp['turn'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=10, center=False).apply(lambda y: np.mean(y[0:9])))
-      tmp['min_close'] = tmp['close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=10, center=False).apply(lambda y: min(y[0:9])))
-      tmp['avg_close'] = tmp['close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=10, center=False).apply(lambda y: np.mean(y[0:9])))
-      tmp['avg_amount'] = tmp['amount'].groupby(level=0).apply(lambda x: x.rolling(min_periods=1, window=10, center=False).apply(lambda y: np.mean(y[0:9])))
+      tmp['max_turn'] = tmp['turn'].groupby(level=0).apply(lambda x: x.rolling(min_periods=10, window=10, center=False).apply(lambda y: max(y[0:9])))
+      tmp['avg_turn'] = tmp['turn'].groupby(level=0).apply(lambda x: x.rolling(min_periods=10, window=10, center=False).apply(lambda y: np.mean(y[0:9])))
+      tmp['min_close'] = tmp['close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=10, window=10, center=False).apply(lambda y: min(y[0:9])))
+      tmp['first_close'] = tmp['close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=10, window=10, center=False).apply(lambda y: y[0]))
+      tmp['avg_amount'] = tmp['amount'].groupby(level=0).apply(lambda x: x.rolling(min_periods=10, window=10, center=False).apply(lambda y: np.mean(y[0:9])))
 
-      feature_all['max_turn_diff'] = (raw_k_data['turn']/raw_k_data['max_turn']).map(lambda x: float2Bucket(float(x), 1, 0, 10, 10))
-      feature_all['avg_turn_diff'] = (raw_k_data['turn']/raw_k_data['avg_turn']).map(lambda x: float2Bucket(float(x), 1, 0, 20, 20))
-      feature_all['min_close_diff'] = (raw_k_data['close']/raw_k_data['min_close']).map(lambda x: float2Bucket(float(x), 20, 0, 2, 40))
-      feature_all['avg_close_diff'] = (raw_k_data['close']/raw_k_data['avg_close']).map(lambda x: float2Bucket(float(x), 20, 0, 2, 40))
-      feature_all['avg_amount_diff'] = (raw_k_data['amount']-raw_k_data['avg_amount']).map(lambda x: float2Bucket(float(x), 1, 0, 100, 100))
+      feature_all['max_turn_diff'] = (tmp['turn']/tmp['max_turn']).map(lambda x: float2Bucket(float(x), 1, 0, 10, 10))
+      feature_all['avg_turn_diff'] = (tmp['turn']/tmp['avg_turn']).map(lambda x: float2Bucket(float(x), 1, 0, 20, 20))
+      feature_all['min_close_diff'] = (tmp['close']/tmp['min_close']).map(lambda x: float2Bucket(float(x), 20, 0, 2, 40))
+      feature_all['first_close_diff'] = (tmp['close']/tmp['first_close']).map(lambda x: float2Bucket(float(x), 20, 0, 2, 40))
+      feature_all['avg_amount_diff'] = (tmp['amount']-tmp['avg_amount']).map(lambda x: float2Bucket(float(x), 1, 0, 100, 100))
 
       # bucket size分别为最大1400，2400
-      feature_all['max_turn_min_close_cross'] = feature_all[['max_turn_diff','min_close_diff']].apply(lambda x: (x.max_turn_diff+1)*100 + x.min_close_diff)
-      feature_all['avg_turn_min_close_cross'] = feature_all[['avg_turn_diff','min_close_diff']].apply(lambda x: (x.avg_turn_diff+1)*100 + x.min_close_diff)
+      feature_all['max_turn_min_close_cross'] = feature_all[['max_turn_diff','min_close_diff']].apply(lambda x: (x.max_turn_diff+1)*100 + x.min_close_diff, axis=1)
+      feature_all['avg_turn_min_close_cross'] = feature_all[['avg_turn_diff','min_close_diff']].apply(lambda x: (x.avg_turn_diff+1)*100 + x.min_close_diff, axis=1)
+      feature_all['avg_turn_first_close_cross'] = feature_all[['avg_turn_diff','first_close_diff']].apply(lambda x: (x.avg_turn_diff+1)*100 + x.first_close_diff, axis=1)
 
       # 新增过去n天涨幅超过大盘的点数
       del tmp
       gc.collect()
       tmp = raw_k_data[['close', 'sh_close', 'sz_close', 'cy_close', 'code_market']]
-      for day_cnt in [3, 5, 10, 20, 30, 60, 120]:
+      for day_cnt in [2, 3, 5, 10, 20, 30, 60, 120]:
          tmp['close_nd'] = tmp['close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=day_cnt, window=day_cnt, center=False).apply(lambda y: (y[-1]-y[0])/y[0]))
          tmp['sh_close_nd'] = tmp['sh_close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=day_cnt, window=day_cnt, center=False).apply(lambda y: (y[-1]-y[0])/y[0]))
          tmp['sz_close_nd'] = tmp['sz_close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=day_cnt, window=day_cnt, center=False).apply(lambda y: (y[-1]-y[0])/y[0]))
@@ -359,14 +361,8 @@ class Feature(object):
          feature_all['sh_close_' + str(day_cnt)] = tmp['sh_close_nd'].map(lambda x: float2Bucket(float(x)+1, 50, 0, 4, 200))
          feature_all['sz_close_' + str(day_cnt)] = tmp['sz_close_nd'].map(lambda x: float2Bucket(float(x)+1, 50, 0, 4, 200))
          feature_all['cy_close_' + str(day_cnt)] = tmp['cy_close_nd'].map(lambda x: float2Bucket(float(x)+1, 50, 0, 4, 200))
-         feature_all['close_zsclose_diff_' + str(day_cnt)] = tmp[['close_nd', 'sh_close_nd', 'sz_close_nd', 'cy_close_nd', 'code_market']].apply(lambda x: (x.close_nd-x.sh_close_nd) if x.code_market == 1 else ((x.close_nd-x.sz_close_nd) if x.code_market == 2 else (x.close_nd-x.cy_close_nd)))
-         feature_all['close_zsclose_diff_' + str(day_cnt)] = feature_all['close_zsclose_diff_' + str(day_cnt)].map(lambda x: float2Bucket(float(x)+1, 20, 0, 6, 120))
-      # v9 和v10的样本问题还没有解决
-
-
-
-
-
+         feature_all['close_shclose_diff_' + str(day_cnt)] = tmp[['close_nd', 'sh_close_nd']].apply(lambda x: (x.close_nd-x.sh_close_nd), axis=1)
+         feature_all['close_shclose_diff_' + str(day_cnt)] = feature_all['close_shclose_diff_' + str(day_cnt)].map(lambda x: float2Bucket(float(x)+1, 20, 0, 6, 120))
 
       # 新增股票的历史最高价和时间
 
@@ -398,26 +394,28 @@ class Feature(object):
          sample['label_15_raw'] = 0
          sample['label_15_raw_real'] = 0
          sample['label_15_raw_weight'] = 0
+         sample = sample.round(5)
          sample.to_csv('E:/pythonProject/future/data/datafile/prediction_sample/{model_name}/prediction_sample_{date}.csv'.format(model_name=self.model_name, date=str(self.date_end)), mode='a',header=True, index=False, encoding='utf-8')
       return feature_all
 if __name__ == '__main__':
-   years = [2023]
-   is_predict = True
-   model_name = 'model_v9'
+   years = [2008]
+   is_predict = False
+   model_name = 'model_v10'
    date_start = '2023-02-13'
    date_end = '2023-02-13'
-   # years = [2008, 2009]
-   # years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020,2021,2022]
+   # years = [20082009, 2010, ]
+   years = [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020,2021,2022]
 
    # time.sleep(18000)
    for year in years:
       path = 'E:/pythonProject/future/data/datafile/raw_feature/code_k_data_v5_'
       quater_path = 'E:/pythonProject/future/data/datafile/code_quarter_data_v2_all.csv'
-      output_path = 'E:/pythonProject/future/data/datafile/feature/{year}_feature_v9.csv'.format(year=str(year))
+      output_path = 'E:/pythonProject/future/data/datafile/feature/{year}_feature_v10.csv'.format(year=str(year))
       # raw_k_data = pd.read_csv(path + str(year) + '.csv')
       # raw_k_data.to_csv('E:/pythonProject/future/data/datafile/raw_feature/test_code_k_data_v5_' + str(year) + '.csv', mode='a', header=True, index=False)
       feature = Feature(path, year, quater_path, is_predict, date_start, date_end, model_name)
       feature_all = feature.feature_process()
+      feature_all = feature_all.round(5)
       if os.path.isfile(output_path):
          feature_all.to_csv(output_path, mode='a', header=False, index=False)
       else:

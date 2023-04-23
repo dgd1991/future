@@ -342,12 +342,12 @@ class Feature(object):
       return feature_all
 if __name__ == '__main__':
    years = [2023]
-   is_predict = True
+   is_predict = False
    model_name = 'model_v9'
    date_start = '2023-02-16'
    date_end = '2023-02-16'
    # years = [2008, 2009]
-   # years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020,2021,2022]
+   years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020,2021,2022]
 
    # time.sleep(18000)
    for year in years:
