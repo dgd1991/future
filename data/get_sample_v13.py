@@ -17,7 +17,6 @@ class Sample(object):
 	def __init__(self, year, base_path, model_name):
 		self.year = year
 		self.code_fea_path = base_path + '/feature/' + model_name + '/code_feature_' + str(year) + '.csv'
-		self.industry1_fea_path = base_path + '/feature/' + model_name + '/industry1_feature_' + str(year) + '.csv'
 		self.label_path = base_path + '/label/' + str(year) + '_raw_v6.csv'
 		self.year = year
 		self.output_dir = base_path
@@ -42,28 +41,22 @@ class Sample(object):
 		label = label[['code','date','label_7','pctChg_7','sh_pctChg_7','label_15','pctChg_15','sh_pctChg_15']]
 
 		feature = pd.read_csv(self.code_fea_path)
-		feature = feature[['date', 'code', 'industry_id_level1']]
 		feature['date'] = feature['date'].map(lambda x: int(x.replace('-', '')))
-
-		industry1_feature = pd.read_csv(self.industry1_fea_path)
-		industry1_feature['date'] = industry1_feature['date'].map(lambda x: int(x.replace('-', '')))
 		# if self.year == 2008:
 		# 	feature['date'] = pd.to_datetime(feature["date"], errors='coerce')
-		feature = pd.merge(feature, industry1_feature, how="left", left_on=['date', "industry_id_level1"],right_on=['date', 'industry_id_level1'])
 		feature = pd.merge(feature, label, how="inner", left_on=['date', "code"],right_on=['date', 'code'])
-
 		del label
 		gc.collect()
 		feature = feature.round(6)
-		feature.to_csv('{output_dir}/sample/{model_name}/train_sample_{year}.csv'.format(output_dir=self.output_dir, model_name='model_v13', year=str(self.year)), mode='w',header=True, index=False, encoding='utf-8')
+		feature.to_csv('{output_dir}/sample/{model_name}/train_sample_{year}.csv'.format(output_dir=self.output_dir, model_name=self.model_name, year=str(self.year)), mode='w',header=True, index=False, encoding='utf-8')
 		del feature
 		gc.collect()
 if __name__ == '__main__':
-	# time.sleep(7200)
 	base_path = 'E:/pythonProject/future/data/datafile'
-	model_name = 'model_v12'
-	years = [2008]
-	years = [2008,2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022]
+	model_name = 'model_v13'
+	# time.sleep(7200)
+	years = [2023]
+	years = [2023]
 	for year in years:
 		sample = Sample(year, base_path, model_name)
 		sample.get_sample()

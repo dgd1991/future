@@ -56,9 +56,9 @@ class ModelEval(object):
 	# print('all_mean: ' + str(all_mean))
 if __name__ == "__main__":
 	# , 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019
-	dates = ["2023-04-26"]
+	dates = ["2023-04-27"]
 	# years = [2009, 2010]
-	model_name = 'saved_model_v12'
+	model_name = 'saved_model_v13'
 	result = []
 	for date in dates:
 		modelEval = ModelEval(date, model_name)

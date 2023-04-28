@@ -111,7 +111,7 @@ if __name__ == '__main__':
 	year = 2022
 	last_year = 2023
 	Label = Label(path + str(year) + '.csv', path + str(year + 1) + '.csv', path + str(year - 1) + '.csv', year, last_year)
-	years = [2022]
+	years = [2023]
 	# years = [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022]
 	for year in years:
 		Label.year = year

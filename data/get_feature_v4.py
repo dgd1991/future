@@ -74,14 +74,15 @@ class Feature(object):
 
    def feature_process(self):
       raw_k_data = pd.read_csv(self.k_file_path)
+      raw_k_data = raw_k_data[raw_k_data['date'] > self.tools.get_recent_month_date(self.date_start, -1)]
       raw_k_data = raw_k_data[(raw_k_data['industry_id_level3'] > 0)]
-      raw_k_data_his = pd.read_csv(self.k_file_path_his)
-      raw_k_data_his = raw_k_data_his[(raw_k_data_his['industry_id_level3'] > 0)]
-      if is_predict:
-         raw_k_data_his = raw_k_data_his[raw_k_data_his['date']>self.tools.get_recent_month_date(self.date_start, -14)]
-      raw_k_data = pd.concat([raw_k_data_his, raw_k_data], axis=0)
-      del raw_k_data_his
-      gc.collect()
+      # raw_k_data_his = pd.read_csv(self.k_file_path_his)
+      # raw_k_data_his = raw_k_data_his[(raw_k_data_his['industry_id_level3'] > 0)]
+      # if is_predict:
+      #    raw_k_data_his = raw_k_data_his[raw_k_data_his['date']>self.tools.get_recent_month_date(self.date_start, -14)]
+      # raw_k_data = pd.concat([raw_k_data_his, raw_k_data], axis=0)
+      # del raw_k_data_his
+      # gc.collect()
       raw_k_data['date'] = raw_k_data['date'].map(lambda x: int(x.replace('-', '')))
       raw_k_data["tradestatus"] = pd.to_numeric(raw_k_data["tradestatus"], errors='coerce')
       raw_k_data["turn"] = pd.to_numeric(raw_k_data["turn"], errors='coerce')
@@ -90,32 +91,21 @@ class Feature(object):
       raw_k_data['amount'] = 0.00000001 * pd.to_numeric(raw_k_data["amount"], errors='coerce')
       raw_k_data = raw_k_data[(raw_k_data['tradestatus'] == 1) & (raw_k_data['turn'] > 0) & (raw_k_data['pctChg'] < 21) & (raw_k_data['pctChg'] > -21)]
 
-
       raw_k_data = raw_k_data[["code","date","turn", "close", "amount"]]
-      raw_k_data['date_new'] = raw_k_data['date']
       raw_k_data = raw_k_data.sort_values(['code', 'date'])
       raw_k_data = raw_k_data.groupby('code').apply(lambda x: x.set_index('date'))
-      tmp = raw_k_data[['date_new','close']]
 
-      raw_k_data['max_turn'] = raw_k_data['turn'].groupby(level=0).apply(lambda x: x.rolling(min_periods=10, window=10, center=False).apply(lambda y: max(y[0:9])))
-      raw_k_data['turn_diff'] = raw_k_data['turn']/raw_k_data['max_turn']
-      raw_k_data['min_close'] = raw_k_data['close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=30, window=30, center=False).apply(lambda y: min(y[0:29])))
-      raw_k_data['close_diff'] = raw_k_data['close'] / raw_k_data['min_close']
-
-      tmp['close_cur_day'] = tmp['close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=8, window=8, center=False).apply(lambda y: y[0]))
-      tmp['date_7'] = tmp['date_new'].groupby(level=0).apply(lambda x: x.rolling(min_periods=8, window=8, center=False).apply(lambda y: y[0]))
-      tmp['pctChg_7'] = (tmp['close'] - tmp['close_cur_day'])/tmp['close_cur_day']
+      raw_k_data['avg_turn'] = raw_k_data['turn'].groupby(level=0).apply(lambda x: x.rolling(min_periods=10, window=10, center=False).apply(lambda y: np.mean(y[0:9])))
+      raw_k_data['turn_diff'] = raw_k_data['turn']/raw_k_data['avg_turn']
+      raw_k_data['avg_close'] = raw_k_data['close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=10, window=10, center=False).apply(lambda y: np.mean(y[0:9])))
+      raw_k_data['close_diff'] = raw_k_data['close'] / raw_k_data['avg_close']
 
       raw_k_data = raw_k_data.reset_index(level=0, drop=True)
       raw_k_data = raw_k_data.reset_index(level=0, drop=False)
 
-      tmp = tmp.reset_index(level=0, drop=False)
-      tmp = tmp.reset_index(level=0, drop=False)
-      tmp = tmp[["code","date_7","pctChg_7"]]
-
-      raw_k_data = pd.merge(raw_k_data, tmp, how="inner", left_on=["code","date"], right_on=["code","date_7"])
-
       raw_k_data = raw_k_data.sort_values(['turn_diff'],ascending=False)
+      raw_k_data = raw_k_data[raw_k_data['turn_diff']>2]
+      raw_k_data = raw_k_data[raw_k_data['close_diff'] > 1]
 
       self.code_industry = pd.read_csv(self.sw_code_all_industry_path, encoding='utf-8')
       self.code_industry['start_date'] = pd.to_datetime(self.code_industry['start_date'])
@@ -133,15 +123,18 @@ class Feature(object):
       raw_k_data = pd.merge(raw_k_data, tmp1, how="inner", left_on=["date",'industry_name_level1'], right_on=["date",'industry_name_level1'])
       raw_k_data = pd.merge(raw_k_data, tmp2, how="inner", left_on=["date",'industry_name_level2'], right_on=["date",'industry_name_level2'])
       raw_k_data = pd.merge(raw_k_data, tmp3, how="inner", left_on=["date",'industry_name_level3'], right_on=["date",'industry_name_level3'])
-      raw_k_data = raw_k_data[(raw_k_data['level1_cnt']>10) | (raw_k_data['level2_cnt']>5) | (raw_k_data['level3_cnt']>3)]
-      raw_k_data = raw_k_data.sort_values(by=['date'], ascending=False)
+      # raw_k_data = raw_k_data[(raw_k_data['level1_cnt']>10) | (raw_k_data['level2_cnt']>5) | (raw_k_data['level3_cnt']>3)]
 
-
+      raw_k_data = raw_k_data[raw_k_data['date'] == int(self.date_start.replace('-', ''))]
+      raw_k_data = raw_k_data.sort_values(by=['turn_diff'], ascending=False)
+      name = ['date','code','turn_diff','close_diff','turn','close','amount','avg_turn','avg_close','close_diff','industry_name_level1','industry_name_level2','industry_name_level3','level1_cnt','level2_cnt','level3_cnt']
+      raw_k_data = raw_k_data[name]
+      raw_k_data = raw_k_data.round(5)
       if is_predict:
          raw_k_data = raw_k_data[(raw_k_data['date'] >= self.date_start) & (raw_k_data['date'] <= self.date_end)]
          raw_k_data.to_csv('E:/pythonProject/future/data/datafile/prediction_sample/{model_name}/test_{date}.csv'.format(model_name=self.model_name, date=str(self.date_end)), mode='w',header=True, index=False, encoding='utf-8')
       else:
-         raw_k_data.to_csv('E:/pythonProject/future/data/datafile/prediction_sample/{model_name}/test_{date}.csv'.format(model_name=self.model_name, date=str(self.year)), mode='w',header=True, index=False, encoding='utf-8')
+         raw_k_data.to_csv('E:/pythonProject/future/data/datafile/prediction_sample/{model_name}/test_{date}.csv'.format(model_name=self.model_name, date=str(self.date_end)), mode='w',header=True, index=False, encoding='utf-8')
 
       # raw_k_data = raw_k_data[raw_k_data['turn_diff']>2]
       # print(raw_k_data.groupby("industry_name_level1")['code'].count().sort_values(ascending=False).reset_index())
@@ -152,8 +145,8 @@ if __name__ == '__main__':
    years = [2023]
    is_predict = False
    model_name = 'model_v12'
-   date_start = '2023-04-19'
-   date_end = '2023-04-19'
+   date_start = '2023-04-24'
+   date_end = '2023-04-24'
    # years = [2008, 2009]
    # years = [2020,2021,2022,2023]
    # years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020,2021,2022]

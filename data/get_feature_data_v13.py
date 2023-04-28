@@ -98,6 +98,7 @@ class Feature(object):
          if self.test:
             raw_k_data = raw_k_data.sample(frac=0.05)
          raw_k_data = raw_k_data[(raw_k_data['industry_id_level3'] > 0) | (raw_k_data['code'] == 'sh.000001') | (raw_k_data['code'] == 'sz.399001') | (raw_k_data['code'] == 'sz.399006')]
+         raw_k_data.drop_duplicates(inplace=True)
          raw_k_data["tradestatus"] = pd.to_numeric(raw_k_data["tradestatus"], errors='coerce')
          raw_k_data["turn"] = pd.to_numeric(raw_k_data["turn"], errors='coerce')
          raw_k_data["pctChg"] = pd.to_numeric(raw_k_data["pctChg"], errors='coerce')
@@ -110,7 +111,7 @@ class Feature(object):
          raw_k_data = raw_k_data.reset_index(level=0, drop=True)
          raw_k_data = raw_k_data.reset_index(level=0, drop=False)
          # raw_k_data = raw_k_data[raw_k_data['date']>=(str(year-2)+"-10-01")]
-         
+
          raw_k_data["open"] = pd.to_numeric(raw_k_data["open"], errors='coerce')
          raw_k_data["close"] = pd.to_numeric(raw_k_data["close"], errors='coerce')
          raw_k_data["pctChg"] = pd.to_numeric(raw_k_data["pctChg"], errors='coerce')
@@ -157,11 +158,15 @@ class Feature(object):
          feature_all = feature_all.reset_index(level=0, drop=False)
          feature_all = feature_all.reset_index(level=0, drop=True)
          feature_all = feature_all[feature_all['date'] > str(self.year)]
+         if is_predict:
+            feature_all = feature_all[(feature_all['date'] >= self.date_start) & (feature_all['date'] <= self.date_end)]
 
          # kdj 5, 9, 19, 36, 45, 73，
          # 任意初始化，超过30天后的kdj值基本一样
          tmp = raw_k_data[['date', 'low', 'high', 'close']]
          tmp = tmp[tmp['date']>self.tools.get_recent_month_date(str(year)+"-01-01", -6)]
+         if is_predict:
+            tmp = tmp[tmp['date']>self.tools.get_recent_month_date(self.date_start, -6)]
          kdj = tmp[['date']]
          for day_cnt in [3, 5, 9, 19, 73]:
             tmp['min'] = tmp['low'].groupby(level=0).apply(lambda x: x.rolling(min_periods=day_cnt, window=day_cnt, center=False).min())
@@ -181,6 +186,8 @@ class Feature(object):
          # 任意初始化，超过30天后的macd值基本一样
          tmp = raw_k_data[['date','close']]
          tmp = tmp[tmp['date'] > self.tools.get_recent_month_date(str(year) + "-01-01", -6)]
+         if is_predict:
+            tmp = tmp[tmp['date']>self.tools.get_recent_month_date(self.date_start, -6)]
          macd = tmp[['date']]
          tmp['ema_12'] = tmp['close'].groupby(level=0).apply(lambda x: x.ewm(alpha=2.0 / 13, adjust=False).mean())
          tmp['ema_26'] = tmp['close'].groupby(level=0).apply(lambda x: x.ewm(alpha=2.0 / 27, adjust=False).mean())
@@ -207,6 +214,8 @@ class Feature(object):
          # 效果很好，可以多做几天的，比如3天，5天，10天，40天
          tmp = raw_k_data[['date', 'close']]
          tmp = tmp[tmp['date'] > self.tools.get_recent_month_date(str(year) + "-01-01", -6)]
+         if is_predict:
+            tmp = tmp[tmp['date']>self.tools.get_recent_month_date(self.date_start, -6)]
          boll = tmp[['date']]
          for day_cnt in [2, 3, 5, 10, 20, 40]:
             tmp['mb_' + str(day_cnt)] = tmp['close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=day_cnt, window=day_cnt, center=False).mean())
@@ -223,6 +232,8 @@ class Feature(object):
          # 似乎对中长期的指数cr指标效果较好，重新设计
          tmp = raw_k_data[['date', 'close', 'open', 'high', 'low']]
          tmp = tmp[tmp['date'] > self.tools.get_recent_month_date(str(year) + "-01-01", -4)]
+         if is_predict:
+            tmp = tmp[tmp['date']>self.tools.get_recent_month_date(self.date_start, -4)]
          cr = tmp[['date']]
          tmp['cr_m'] = (tmp['close'] + tmp['open'] + tmp['high'] + tmp['low'])/4
          tmp['cr_ym'] = tmp['cr_m'].groupby(level=0).apply(lambda x: x.rolling(min_periods=2, window=2, center=False).apply(lambda y: y[0]))
@@ -255,6 +266,8 @@ class Feature(object):
          # rsi指标
          tmp = raw_k_data[['date', 'close', 'preclose']]
          tmp = tmp[tmp['date'] > self.tools.get_recent_month_date(str(year) + "-01-01", -6)]
+         if is_predict:
+            tmp = tmp[tmp['date']>self.tools.get_recent_month_date(self.date_start, -6)]
          rsi = tmp[['date']]
          tmp['price_dif'] = tmp['close'] - tmp['preclose']
          tmp['rsi_positive'] = tmp['price_dif'].apply(lambda x: max(x, 0))
@@ -268,6 +281,8 @@ class Feature(object):
          # 成交量和换手率特征
          tmp = raw_k_data[['date', 'close', 'preclose','turn']]
          tmp = tmp[tmp['date'] > self.tools.get_recent_month_date(str(year) + "-01-01", -15)]
+         if is_predict:
+            tmp = tmp[tmp['date']>self.tools.get_recent_month_date(self.date_start, -15)]
          turn_close = tmp[['date']]
          day_cnt_list = [3, 5, 10, 20, 30, 60, 120, 240]
          for index in range(len(day_cnt_list)):
@@ -331,6 +346,8 @@ class Feature(object):
          # 新增过去n天每个涨幅段的天数比例，换手率的比例,涨停的天数,主要捕捉股性特征，判断股票是否活跃
          tmp = raw_k_data[['date','pctChg', 'turn', 'close', 'high', 'low', 'isST']]
          tmp = tmp[tmp['date'] > self.tools.get_recent_month_date(str(year) + "-01-01", -10)]
+         if is_predict:
+            tmp = tmp[tmp['date']>self.tools.get_recent_month_date(self.date_start, -10)]
          code_activity = tmp[['date']]
          tmp['pctChg_limit'] = tmp.apply(lambda x: self.tools.code_pctChg_limit_type(x.pctChg, x.isST, x.high, x.low, x.close), axis=1)
          tmp['pctChg_up_limit'] = tmp['pctChg_limit'].map(lambda x: 1 if x == 1 else 0)
@@ -379,6 +396,8 @@ class Feature(object):
          gc.collect()
          tmp = raw_k_data[['date',"industry_id_level1","industry_id_level2","industry_id_level3",'turn', 'close']]
          tmp = tmp[tmp['date'] > self.tools.get_recent_month_date(str(year) + "-01-01", -10)]
+         if is_predict:
+            tmp = tmp[tmp['date']>self.tools.get_recent_month_date(self.date_start, -10)]
          code_pctChg_nd = tmp[['date']]
          for day_cnt in [3, 5, 10, 20, 30, 60, 120]:
             code_pctChg_nd['pctChg_' + str(day_cnt) + 'd'] = tmp['close'].groupby(level=0).apply(lambda x: x.rolling(min_periods=day_cnt, window=day_cnt, center=False).apply(lambda y: (y[day_cnt-1]-y[0])/y[0]))
@@ -431,6 +450,8 @@ class Feature(object):
          tmp = tmp.reset_index(level=0, drop=False)
          tmp = tmp.reset_index(level=0, drop=True)
          tmp = tmp[tmp['date'] > str(self.year)]
+         if is_predict:
+            tmp = tmp[tmp['date']>self.tools.get_recent_month_date(self.date_start, -1)]
          tmp = tmp.sort_values(['date', 'code'])
 
          tmp['market_value_rank_industry1'] = tmp.sort_values(['market_value'], ascending=False).groupby(['date','industry_id_level1']).cumcount()+1
@@ -451,6 +472,8 @@ class Feature(object):
          tmp = tmp.reset_index(level=0, drop=False)
          tmp = tmp.reset_index(level=0, drop=True)
          tmp = tmp[tmp['date'] > self.tools.get_recent_month_date(str(year) + "-01-01", -15)]
+         if is_predict:
+            tmp = tmp[tmp['date']>self.tools.get_recent_month_date(self.date_start, -15)]
          tmp = tmp.sort_values(['date', 'code'])
 
          tmp['pctChg_rank'] = tmp.sort_values(['pctChg'], ascending=False).groupby(['date']).cumcount()+1
@@ -561,7 +584,7 @@ if __name__ == '__main__':
    # is_industry2 = True
    # is_industry3 = True
    # is_market = True
-   
+
    # is_code = False
    is_industry1 = False
    is_industry2 = False
@@ -569,11 +592,11 @@ if __name__ == '__main__':
    is_market = False
 
    years = [2008]
-   is_predict = False
+   is_predict = True
    model_name = 'model_v13'
-   date_start = '2023-04-17'
-   date_end = '2023-04-17'
-   years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023]
+   date_start = '2023-04-28'
+   date_end = '2023-04-28'
+   years = [2023]
    # time.sleep(18000)
    # years = [2020,2021,2022]
 
